@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
+apply plugin: "java"
+apply plugin: "application"
+apply plugin: "maven-publish"
+
+group = "io.pravega"
+description = "Pravega Flink Tools"
+
+// Allow main class name to be specified with -PmainClass=xxx.
+application {
+    mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.Main"
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://oss.jfrog.org/jfrog-dependencies"
+    }
+    maven {
+        url "https://repository.apache.org/snapshots"
+    }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    compileOnly "org.apache.flink:flink-java:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-streaming-java_${flinkScalaVersion}:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-table-api-java-bridge_${flinkScalaVersion}:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-table-planner_${flinkScalaVersion}:${flinkVersion}"
+    compileOnly "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
+    compileOnly "io.pravega:pravega-client:0.11.0"
+    compileOnly "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
+
+    compileOnly "org.slf4j:slf4j-api:${slf4jApiVersion}"
+    compileOnly "ch.qos.logback:logback-classic:${logbackVersion}"
+    compileOnly "ch.qos.logback:logback-core:${logbackVersion}"
+    compileOnly "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
+
+    testCompileOnly "org.apache.flink:flink-test-utils_${flinkScalaVersion}:${flinkVersion}"
+    testCompileOnly "junit:junit:${junitVersion}"
+}
+
+// make compileOnly dependencies available for tests:
+/*sourceSets {
+    main.compileClasspath += configurations.flinkShadowJar
+    main.runtimeClasspath += configurations.flinkShadowJar
+
+    test.compileClasspath += configurations.flinkShadowJar
+    test.runtimeClasspath += configurations.flinkShadowJar
+
+    javadoc.classpath += configurations.flinkShadowJar
+}
+
+run.classpath = sourceSets.main.runtimeClasspath
+
+jar {
+    manifest {
+        attributes 'Built-By': System.getProperty('user.name'),
+                'Build-Jdk': System.getProperty('java.version')
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.flinkShadowJar]
+}*/
