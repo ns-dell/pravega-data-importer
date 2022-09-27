@@ -37,17 +37,17 @@ public class PravegaStreamMirroringJob extends AbstractJob {
 
     final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJob.class);
 
-    /**
-     * The entry point for Flink applications.
-     *
-     * @param args Command line arguments
-     */
-    public static void main(String... args) throws Exception {
-        AppConfiguration config = new AppConfiguration(args);
-        log.info("config: {}", config);
-        PravegaStreamMirroringJob job = new PravegaStreamMirroringJob(config);
-        job.run();
-    }
+//    /**
+//     * The entry point for Flink applications.
+//     *
+//     * @param args Command line arguments
+//     */
+//    public static void main(String... args) throws Exception {
+//        AppConfiguration config = new AppConfiguration(args);
+//        log.info("config: {}", config);
+//        PravegaStreamMirroringJob job = new PravegaStreamMirroringJob(config);
+//        job.run();
+//    }
 
     public PravegaStreamMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
@@ -57,13 +57,13 @@ public class PravegaStreamMirroringJob extends AbstractJob {
         try {
             final String jobName = getConfig().getJobName(PravegaStreamMirroringJob.class.getName());
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
-            log.info("input stream: {}", inputStreamConfig);
-            createStream(inputStreamConfig);
+//            log.info("input stream: {}", inputStreamConfig);
+//            createStream(inputStreamConfig);
             final StreamCut startStreamCut = resolveStartStreamCut(inputStreamConfig);
             final StreamCut endStreamCut = resolveEndStreamCut(inputStreamConfig);
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
-            log.info("output stream: {}", outputStreamConfig);
-            createStream(outputStreamConfig);
+//            log.info("output stream: {}", outputStreamConfig);
+//            createStream(outputStreamConfig);
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 

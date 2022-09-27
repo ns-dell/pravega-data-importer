@@ -15,13 +15,15 @@
  */
 package io.pravega.dataimporter.actions;
 
+import io.pravega.dataimporter.AppConfiguration;
+
 public class ActionFactory {
 
-    public Action instantiateAction(String actionType) {
+    public Action instantiateAction(String actionType, AppConfiguration configuration) {
         switch (actionType) {
 
             case MirroringAction.NAME:
-                return new MirroringAction();
+                return new MirroringAction(configuration);
             case ImportAction.NAME:
                 return new ImportAction();
             default:

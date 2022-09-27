@@ -50,22 +50,6 @@ public abstract class AbstractJob implements Runnable {
     }
 
     /**
-     * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
-     * If the stream exists, it is unchanged.
-     */
-    public void createStream(AppConfiguration.StreamConfig streamConfig) {
-        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
-            StreamConfiguration streamConfiguration = StreamConfiguration.builder()
-                    .scalingPolicy(streamConfig.getScalingPolicy())
-                    .build();
-            streamManager.createStream(
-                    streamConfig.getStream().getScope(),
-                    streamConfig.getStream().getStreamName(),
-                    streamConfiguration);
-        }
-    }
-
-    /**
      * Get head and tail stream cuts for a Pravega stream.
      */
     public StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
