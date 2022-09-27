@@ -15,7 +15,9 @@
  */
 package io.pravega.dataimporter.actions;
 
-public class ImportAction extends Action {
+import io.pravega.dataimporter.AppConfiguration;
+
+public class ImportAction implements Action {
 
     public final static String NAME = "stream-import";
 
@@ -25,7 +27,12 @@ public class ImportAction extends Action {
     }
 
     @Override
-    public String getJobName() {
-        return "PravegaImportMirroringJob";
+    public void runAction(AppConfiguration.StreamConfig streamConfig) {
+
     }
+
+//    @Override
+//    public String getJobName() {
+//        return "PravegaImportMirroringJob";
+//    }
 }

@@ -15,10 +15,13 @@
  */
 package io.pravega.dataimporter.actions;
 
+import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
+
 /**
  * Implements the workflow related to mirroring one Pravega Stream from one cluster to another.
  */
-public class MirroringAction extends Action {
+public class MirroringAction implements Action {
 
     public final static String NAME = "stream-mirroring";
 
@@ -28,7 +31,12 @@ public class MirroringAction extends Action {
     }
 
     @Override
-    public String getJobName() {
-        return "PravegaStreamMirroringJob";
+    public void runAction(AppConfiguration.StreamConfig streamConfig) {
+
     }
+
+//    @Override
+//    public String getJobName() {
+//        return PravegaStreamMirroringJob.class.getName();
+//    }
 }

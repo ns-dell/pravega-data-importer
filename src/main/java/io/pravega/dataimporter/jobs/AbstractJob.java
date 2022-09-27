@@ -49,57 +49,57 @@ public abstract class AbstractJob implements Runnable {
         return config;
     }
 
-    /**
-     * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
-     * If the stream exists, it is unchanged.
-     */
-    public void createStream(AppConfiguration.StreamConfig streamConfig) {
-        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
-            StreamConfiguration streamConfiguration = StreamConfiguration.builder()
-                    .scalingPolicy(streamConfig.getScalingPolicy())
-                    .build();
-            streamManager.createStream(
-                    streamConfig.getStream().getScope(),
-                    streamConfig.getStream().getStreamName(),
-                    streamConfiguration);
-        }
-    }
-
-    /**
-     * Get head and tail stream cuts for a Pravega stream.
-     */
-    public StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
-        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
-            return streamManager.getStreamInfo(streamConfig.getStream().getScope(), streamConfig.getStream().getStreamName());
-        }
-    }
-
-    /**
-     * Convert UNBOUNDED start StreamCut to a concrete StreamCut, pointing to the current head or tail of the stream
-     * (depending on isStartAtTail).
-     */
-    public StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
-        if (streamConfig.isStartAtTail()) {
-            return getStreamInfo(streamConfig).getTailStreamCut();
-        } else if (streamConfig.getStartStreamCut() == StreamCut.UNBOUNDED) {
-            return getStreamInfo(streamConfig).getHeadStreamCut();
-        } else {
-            return streamConfig.getStartStreamCut();
-        }
-    }
-
-    /**
-     * For bounded reads (indicated by isEndAtTail), convert UNBOUNDED end StreamCut to a concrete StreamCut,
-     * pointing to the current tail of the stream.
-     * For unbounded reads, returns UNBOUNDED.
-     */
-    public StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
-        if (streamConfig.isEndAtTail()) {
-            return getStreamInfo(streamConfig).getTailStreamCut();
-        } else {
-            return streamConfig.getEndStreamCut();
-        }
-    }
+//    /**
+//     * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
+//     * If the stream exists, it is unchanged.
+//     */
+//    public void createStream(AppConfiguration.StreamConfig streamConfig) {
+//        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
+//            StreamConfiguration streamConfiguration = StreamConfiguration.builder()
+//                    .scalingPolicy(streamConfig.getScalingPolicy())
+//                    .build();
+//            streamManager.createStream(
+//                    streamConfig.getStream().getScope(),
+//                    streamConfig.getStream().getStreamName(),
+//                    streamConfiguration);
+//        }
+//    }
+//
+//    /**
+//     * Get head and tail stream cuts for a Pravega stream.
+//     */
+//    public StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
+//        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
+//            return streamManager.getStreamInfo(streamConfig.getStream().getScope(), streamConfig.getStream().getStreamName());
+//        }
+//    }
+//
+//    /**
+//     * Convert UNBOUNDED start StreamCut to a concrete StreamCut, pointing to the current head or tail of the stream
+//     * (depending on isStartAtTail).
+//     */
+//    public StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
+//        if (streamConfig.isStartAtTail()) {
+//            return getStreamInfo(streamConfig).getTailStreamCut();
+//        } else if (streamConfig.getStartStreamCut() == StreamCut.UNBOUNDED) {
+//            return getStreamInfo(streamConfig).getHeadStreamCut();
+//        } else {
+//            return streamConfig.getStartStreamCut();
+//        }
+//    }
+//
+//    /**
+//     * For bounded reads (indicated by isEndAtTail), convert UNBOUNDED end StreamCut to a concrete StreamCut,
+//     * pointing to the current tail of the stream.
+//     * For unbounded reads, returns UNBOUNDED.
+//     */
+//    public StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
+//        if (streamConfig.isEndAtTail()) {
+//            return getStreamInfo(streamConfig).getTailStreamCut();
+//        } else {
+//            return streamConfig.getEndStreamCut();
+//        }
+//    }
 
     public StreamExecutionEnvironment initializeFlinkStreaming() {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

@@ -37,6 +37,6 @@ public class Main {
         dataImportAction.commitMetadataChanges();
 
         // STEP 3: Submit the associated job to Flink.
-        dataImportAction.submitDataImportJob();
+//        dataImportAction.submitDataImportJob();
     }
 }
