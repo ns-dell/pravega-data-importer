@@ -1,22 +1,15 @@
-/**
- * Copyright Pravega Authors.
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package io.pravega.dataimporter.jobs;
 
-import io.pravega.client.stream.StreamCut;
-import io.pravega.connectors.flink.FlinkPravegaReader;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.AppConfiguration;
@@ -25,44 +18,42 @@ import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
 import io.pravega.dataimporter.utils.Filters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Properties;
+
 /**
- * Continuously copy a Pravega stream to another Pravega stream.
- * This supports events with any serialization.
- * When writing events, a fixed routing key is used.
+ * Continuously copy a Kafka stream to a Pravega stream.
  */
-public class PravegaStreamMirroringJob extends AbstractJob {
+public class KafkaToPravegaStreamJob extends AbstractJob {
+    final private static Logger log = LoggerFactory.getLogger(KafkaToPravegaStreamJob.class);
 
-    final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJob.class);
-
-    public PravegaStreamMirroringJob(AppConfiguration appConfiguration) {
+    public KafkaToPravegaStreamJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
     }
 
     public void run() {
         try {
-            final String jobName = getConfig().getJobName(PravegaStreamMirroringJob.class.getName());
-            final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
-
-            final StreamCut startStreamCut = resolveStartStreamCut(inputStreamConfig);
-            final StreamCut endStreamCut = resolveEndStreamCut(inputStreamConfig);
+            final String jobName = getConfig().getJobName(KafkaToPravegaStreamJob.class.getName());
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
+            log.info("output stream: {}", outputStreamConfig);
 
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
             final StreamExecutionEnvironment env = initializeFlinkStreaming();
-            final FlinkPravegaReader<byte[]> flinkPravegaReader = FlinkPravegaReader.<byte[]>builder()
-                    .withPravegaConfig(inputStreamConfig.getPravegaConfig())
-                    .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)
-                    .withDeserializationSchema(new ByteArrayDeserializationFormat())
-                    .build();
+
+            Properties properties = new Properties();
+            properties.setProperty("bootstrap.servers", getConfig().getParams().get("bootstrap.servers","localhost:9092"));
+            properties.setProperty("zookeeper.connect", getConfig().getParams().get("zookeeper.connect","localhost:2181"));
+            properties.setProperty("group.id", "test");
+            final FlinkKafkaConsumer<byte[]> flinkKafkaConsumer = new FlinkKafkaConsumer<>("test-input", new ByteArrayDeserializationFormat(), properties);
             final DataStream<byte[]> events = env
-                    .addSource(flinkPravegaReader)
-                    .uid("pravega-reader")
-                    .name("Pravega reader from " + inputStreamConfig.getStream().getScopedName());
+                    .addSource(flinkKafkaConsumer)
+                    .uid("kafka-consumer")
+                    .name("Kafka consumer from " + getConfig().getParams().get("input-topic"));
 
             final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(events, getConfig().getParams());
 
@@ -73,7 +64,8 @@ public class PravegaStreamMirroringJob extends AbstractJob {
                     .withEventRouter(event -> fixedRoutingKey)
                     .withWriterMode(PravegaWriterMode.EXACTLY_ONCE)
                     .build();
-            toOutput.addSink(sink)
+            toOutput
+                    .addSink(sink)
                     .uid("pravega-writer")
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 

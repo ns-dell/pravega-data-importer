@@ -15,6 +15,10 @@
  */
 package io.pravega.dataimporter.actions;
 
+import io.pravega.client.admin.StreamManager;
+import io.pravega.client.stream.StreamConfiguration;
+import io.pravega.dataimporter.AppConfiguration;
+
 /**
  * Interface that all Actions should implement (mirroring, importing, etc.).
  */
@@ -31,6 +35,23 @@ public abstract class Action {
 
     public void submitDataImportJob() {
         // TODO: Logic to submit a job to run in FLink programmatically
+    }
+
+    /**
+     * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
+     * If the stream exists, it is unchanged.
+     */
+    public static void createStream(AppConfiguration.StreamConfig streamConfig, String streamTag) {
+        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
+            StreamConfiguration streamConfiguration = StreamConfiguration.builder()
+                    .scalingPolicy(streamConfig.getScalingPolicy())
+                    .tag(streamTag)
+                    .build();
+            streamManager.createStream(
+                    streamConfig.getStream().getScope(),
+                    streamConfig.getStream().getStreamName(),
+                    streamConfiguration);
+        }
     }
 
 }

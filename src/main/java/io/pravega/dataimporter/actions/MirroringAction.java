@@ -50,10 +50,10 @@ public class MirroringAction extends Action {
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
         log.info("input stream: {}", inputStreamConfig);
-        createStream(inputStreamConfig, "mirror");
+        Action.createStream(inputStreamConfig, "mirror");
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
         log.info("output stream: {}", outputStreamConfig);
-        createStream(outputStreamConfig, "mirror");
+        Action.createStream(outputStreamConfig, "mirror");
     }
 
     @Override
@@ -64,22 +64,5 @@ public class MirroringAction extends Action {
     @Override
     public void submitDataImportJob() {
         job.run();
-    }
-
-    /**
-     * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
-     * If the stream exists, it is unchanged.
-     */
-    public void createStream(AppConfiguration.StreamConfig streamConfig, String streamTag) {
-        try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
-            StreamConfiguration streamConfiguration = StreamConfiguration.builder()
-                    .scalingPolicy(streamConfig.getScalingPolicy())
-                    .tag(streamTag)
-                    .build();
-            streamManager.createStream(
-                    streamConfig.getStream().getScope(),
-                    streamConfig.getStream().getStreamName(),
-                    streamConfiguration);
-        }
     }
 }

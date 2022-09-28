@@ -26,6 +26,8 @@ public class ActionFactory {
                 return new MirroringAction(configuration);
             case ImportAction.NAME:
                 return new ImportAction();
+            case KafkaMirroringAction.NAME:
+                return new KafkaMirroringAction(configuration);
             default:
                 throw new IllegalArgumentException("Unknown action type.");
         }
