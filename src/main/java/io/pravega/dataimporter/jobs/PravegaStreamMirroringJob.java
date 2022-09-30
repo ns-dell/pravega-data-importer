@@ -37,13 +37,20 @@ public class PravegaStreamMirroringJob extends AbstractJob {
 
     final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJob.class);
 
+    final StreamExecutionEnvironment env;
+
+    final String jobName = getConfig().getJobName(PravegaStreamMirroringJob.class.getName());
+
     public PravegaStreamMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
+        String flinkHost = appConfiguration.getParams().get("flinkHost");
+        int flinkPort = Integer.parseInt(appConfiguration.getParams().get("flinkPort"));
+        String flinkJar = appConfiguration.getParams().get("flinkJar");
+        env = initializeFlinkStreaming(flinkHost, flinkPort, flinkJar);
     }
 
     public void run() {
         try {
-            final String jobName = getConfig().getJobName(PravegaStreamMirroringJob.class.getName());
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
 
             final StreamCut startStreamCut = resolveStartStreamCut(inputStreamConfig);
@@ -53,7 +60,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
-            final StreamExecutionEnvironment env = initializeFlinkStreaming();
+//            final StreamExecutionEnvironment env = initializeFlinkStreaming();
             final FlinkPravegaReader<byte[]> flinkPravegaReader = FlinkPravegaReader.<byte[]>builder()
                     .withPravegaConfig(inputStreamConfig.getPravegaConfig())
                     .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)

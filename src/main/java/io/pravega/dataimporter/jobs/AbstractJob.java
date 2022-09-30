@@ -17,7 +17,6 @@ package io.pravega.dataimporter.jobs;
 
 import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.StreamCut;
 import io.pravega.dataimporter.AppConfiguration;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -85,8 +84,9 @@ public abstract class AbstractJob implements Runnable {
         }
     }
 
-    public StreamExecutionEnvironment initializeFlinkStreaming() {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    public StreamExecutionEnvironment initializeFlinkStreaming(String host, int port, String jarFiles) {
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment(host, port, jarFiles);
 
         // Make parameters show in Flink UI.
         env.getConfig().setGlobalJobParameters(getConfig().getParams());

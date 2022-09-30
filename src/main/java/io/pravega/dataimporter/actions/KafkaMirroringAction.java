@@ -12,11 +12,9 @@ public class KafkaMirroringAction extends Action{
 
     private final AppConfiguration config;
 
-    private final KafkaToPravegaStreamJob job;
-
     public KafkaMirroringAction(AppConfiguration config) {
         this.config = config;
-        job = new KafkaToPravegaStreamJob(this.config);
+        super.job = new KafkaToPravegaStreamJob(this.config);
     }
 
     public AppConfiguration getConfig() {
@@ -32,11 +30,11 @@ public class KafkaMirroringAction extends Action{
 
     @Override
     public String getJobName() {
-        return "KafkaToPravegaMirroringJob";
+        return job.getClass().getName();
     }
 
-    @Override
-    public void submitDataImportJob() {
-        job.run();
-    }
+//    @Override
+//    public void submitDataImportJob() {
+//        job.run();
+//    }
 }

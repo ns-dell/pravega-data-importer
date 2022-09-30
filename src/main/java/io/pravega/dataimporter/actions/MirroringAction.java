@@ -15,10 +15,6 @@
  */
 package io.pravega.dataimporter.actions;
 
-import io.pravega.client.admin.StreamInfo;
-import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.StreamConfiguration;
-import io.pravega.client.stream.StreamCut;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
 import org.slf4j.Logger;
@@ -35,11 +31,9 @@ public class MirroringAction extends Action {
 
     private final AppConfiguration config;
 
-    private final PravegaStreamMirroringJob job;
-
     public MirroringAction(AppConfiguration config) {
         this.config = config;
-        job = new PravegaStreamMirroringJob(this.config);
+        super.job = new PravegaStreamMirroringJob(this.config);
     }
 
     public AppConfiguration getConfig() {
@@ -58,11 +52,11 @@ public class MirroringAction extends Action {
 
     @Override
     public String getJobName() {
-        return "PravegaStreamMirroringJob";
+        return job.getClass().getName();
     }
 
-    @Override
-    public void submitDataImportJob() {
-        job.run();
-    }
+//    @Override
+//    public void submitDataImportJob() {
+//        job.run();
+//    }
 }

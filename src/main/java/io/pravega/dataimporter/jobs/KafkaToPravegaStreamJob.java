@@ -30,20 +30,27 @@ import java.util.Properties;
 public class KafkaToPravegaStreamJob extends AbstractJob {
     final private static Logger log = LoggerFactory.getLogger(KafkaToPravegaStreamJob.class);
 
+    final String jobName = getConfig().getJobName(KafkaToPravegaStreamJob.class.getName());
+
+    final StreamExecutionEnvironment env;
+
     public KafkaToPravegaStreamJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
+        String flinkHost = appConfiguration.getParams().get("flinkHost");
+        int flinkPort = Integer.parseInt(appConfiguration.getParams().get("flinkPort"));
+        String flinkJar = appConfiguration.getParams().get("flinkJar");
+        env = initializeFlinkStreaming(flinkHost, flinkPort, flinkJar);
     }
 
     public void run() {
         try {
-            final String jobName = getConfig().getJobName(KafkaToPravegaStreamJob.class.getName());
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
             log.info("output stream: {}", outputStreamConfig);
 
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
-            final StreamExecutionEnvironment env = initializeFlinkStreaming();
+//            final StreamExecutionEnvironment env = initializeFlinkStreaming();
 
             Properties properties = new Properties();
             properties.setProperty("bootstrap.servers", getConfig().getParams().get("bootstrap.servers","localhost:9092"));

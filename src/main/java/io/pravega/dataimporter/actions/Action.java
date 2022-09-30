@@ -18,11 +18,14 @@ package io.pravega.dataimporter.actions;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.jobs.AbstractJob;
 
 /**
  * Interface that all Actions should implement (mirroring, importing, etc.).
  */
 public abstract class Action {
+
+    protected AbstractJob job;
 
     /**
      * Most actions may require to perform some metadata changes before actually start doing the actual import job.
@@ -35,6 +38,7 @@ public abstract class Action {
 
     public void submitDataImportJob() {
         // TODO: Logic to submit a job to run in FLink programmatically
+        job.run();
     }
 
     /**
