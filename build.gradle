@@ -79,7 +79,7 @@ dependencies {
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
 
-    testCompileOnly "org.apache.flink:flink-test-utils_${flinkScalaVersion}:${flinkVersion}"
+    testCompileOnly "org.apache.flink:flink-test-utils:${flinkVersion}"
     testCompileOnly "junit:junit:${junitVersion}"
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"

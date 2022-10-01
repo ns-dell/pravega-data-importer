@@ -84,10 +84,8 @@ public abstract class AbstractJob implements Runnable {
         }
     }
 
-    public StreamExecutionEnvironment initializeFlinkStreaming(String host, int port) {
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment(host, port);
-
+    public StreamExecutionEnvironment initializeFlinkStreaming() {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // Make parameters show in Flink UI.
         env.getConfig().setGlobalJobParameters(getConfig().getParams());
 

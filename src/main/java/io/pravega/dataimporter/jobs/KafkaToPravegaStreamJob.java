@@ -36,9 +36,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
 
     public KafkaToPravegaStreamJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
-        String flinkHost = appConfiguration.getParams().get("flinkHost");
-        int flinkPort = Integer.parseInt(appConfiguration.getParams().get("flinkPort"));
-        env = initializeFlinkStreaming(flinkHost, flinkPort);
+        env = initializeFlinkStreaming();
     }
 
     public void run() {
