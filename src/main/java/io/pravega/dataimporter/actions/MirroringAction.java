@@ -55,8 +55,4 @@ public class MirroringAction extends Action {
         return job.getClass().getName();
     }
 
-//    @Override
-//    public void submitDataImportJob() {
-//        job.run();
-//    }
 }

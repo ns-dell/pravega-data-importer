@@ -57,7 +57,6 @@ public class PravegaStreamMirroringJob extends AbstractJob {
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
-//            final StreamExecutionEnvironment env = initializeFlinkStreaming();
             final FlinkPravegaReader<byte[]> flinkPravegaReader = FlinkPravegaReader.<byte[]>builder()
                     .withPravegaConfig(inputStreamConfig.getPravegaConfig())
                     .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)

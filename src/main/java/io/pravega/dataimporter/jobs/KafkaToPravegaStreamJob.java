@@ -47,13 +47,12 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
-//            final StreamExecutionEnvironment env = initializeFlinkStreaming();
-
             Properties properties = new Properties();
             properties.setProperty("bootstrap.servers", getConfig().getParams().get("bootstrap.servers","localhost:9092"));
             properties.setProperty("zookeeper.connect", getConfig().getParams().get("zookeeper.connect","localhost:2181"));
+            String kafkaTopic = getConfig().getParams().get("input-topic");
             properties.setProperty("group.id", "test");
-            final FlinkKafkaConsumer<byte[]> flinkKafkaConsumer = new FlinkKafkaConsumer<>("test-input", new ByteArrayDeserializationFormat(), properties);
+            final FlinkKafkaConsumer<byte[]> flinkKafkaConsumer = new FlinkKafkaConsumer<>(kafkaTopic, new ByteArrayDeserializationFormat(), properties);
             final DataStream<byte[]> events = env
                     .addSource(flinkKafkaConsumer)
                     .uid("kafka-consumer")

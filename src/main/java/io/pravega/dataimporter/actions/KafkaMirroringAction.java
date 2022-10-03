@@ -32,9 +32,5 @@ public class KafkaMirroringAction extends Action{
     public String getJobName() {
         return job.getClass().getName();
     }
-
-//    @Override
-//    public void submitDataImportJob() {
-//        job.run();
-//    }
+    
 }
