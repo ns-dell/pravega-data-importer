@@ -83,6 +83,7 @@ dependencies {
     testCompileOnly "junit:junit:${junitVersion}"
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
+    flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
 
     // Schema registry dependencies required due to https://github.com/pravega/flink-connectors/issues/440
     flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
