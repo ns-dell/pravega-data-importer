@@ -16,13 +16,15 @@ import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
 import io.pravega.dataimporter.utils.Filters;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
+import java.util.Collections;
 
 /**
  * Continuously copy a Kafka stream to a Pravega stream.
@@ -47,18 +49,20 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
             final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
-            Properties properties = new Properties();
-            properties.setProperty("bootstrap.servers", getConfig().getParams().get("bootstrap.servers","localhost:9092"));
-            properties.setProperty("zookeeper.connect", getConfig().getParams().get("zookeeper.connect","localhost:2181"));
+            String bootstrap_servers = getConfig().getParams().get("bootstrap.servers","localhost:9092");
             String kafkaTopic = getConfig().getParams().get("input-topic");
-            properties.setProperty("group.id", "test");
-            final FlinkKafkaConsumer<byte[]> flinkKafkaConsumer = new FlinkKafkaConsumer<>(kafkaTopic, new ByteArrayDeserializationFormat(), properties);
-            final DataStream<byte[]> events = env
-                    .addSource(flinkKafkaConsumer)
-                    .uid("kafka-consumer")
-                    .name("Kafka consumer from " + getConfig().getParams().get("input-topic"));
+            final KafkaSource<byte[]> kafkaSource = KafkaSource.<byte[]>builder()
+                    .setBootstrapServers(bootstrap_servers)
+                    .setTopics(Collections.singletonList(kafkaTopic))
+                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
+                    .build();
 
-            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(events, getConfig().getParams());
+            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
+                    env.fromSource(
+                        kafkaSource,
+                        WatermarkStrategy.noWatermarks(),
+                    "Kafka consumer from " + getConfig().getParams().get("input-topic")),
+                    getConfig().getParams());
 
             final FlinkPravegaWriter<byte[]> sink = FlinkPravegaWriter.<byte[]>builder()
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
