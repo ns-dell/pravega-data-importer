@@ -55,6 +55,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
                     .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
+//                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
                     .build();
 
             final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
@@ -68,7 +69,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
                     .withSerializationSchema(new ByteArraySerializationFormat())
-                    .withEventRouter(event -> fixedRoutingKey)
+                    .withEventRouter(event -> fixedRoutingKey) //comment this out for unordered write
                     .withWriterMode(PravegaWriterMode.EXACTLY_ONCE)
                     .build();
             toOutput
