@@ -10,13 +10,16 @@
  */
 package io.pravega.dataimporter.jobs;
 
+import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
+import io.pravega.connectors.flink.serialization.PravegaSerializationSchema;
 import io.pravega.dataimporter.AppConfiguration;
-import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
-import io.pravega.dataimporter.utils.Filters;
+import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserializationSchema;
+import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -24,6 +27,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -46,32 +50,48 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
             log.info("output stream: {}", outputStreamConfig);
 
-            final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey", "");
+            final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey");
             log.info("fixedRoutingKey: {}", fixedRoutingKey);
 
             String bootstrap_servers = getConfig().getParams().get("bootstrap.servers","localhost:9092");
             String kafkaTopic = getConfig().getParams().get("input-topic");
-            final KafkaSource<byte[]> kafkaSource = KafkaSource.<byte[]>builder()
+            final KafkaSource<PravegaRecord<byte[], byte[]>> kafkaSource = KafkaSource.<PravegaRecord<byte[], byte[]>>builder()
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
-                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
-//                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
+//                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
+                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
                     .build();
 
-            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
-                    env.fromSource(
-                        kafkaSource,
-                        WatermarkStrategy.noWatermarks(),
-                    "Kafka consumer from " + getConfig().getParams().get("input-topic")),
-                    getConfig().getParams());
+//            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
+//                    env.fromSource(
+//                        kafkaSource,
+//                        WatermarkStrategy.noWatermarks(),
+//                    "Kafka consumer from " + getConfig().getParams().get("input-topic")),
+//                    getConfig().getParams());
 
-            final FlinkPravegaWriter<byte[]> sink = FlinkPravegaWriter.<byte[]>builder()
+            final DataStream<PravegaRecord<byte[], byte[]>> toOutput =
+                    env.fromSource(
+                            kafkaSource,
+                            WatermarkStrategy.noWatermarks(),
+                            "Kafka consumer from " + getConfig().getParams().get("input-topic"));
+
+            final FlinkPravegaWriter<PravegaRecord<byte[], byte[]>> sink;
+//            SerializationSchema<PravegaRecord<byte[], byte[]>> adapter = new PravegaSerializationSchema<>(
+//                    new JavaSerializer<>());
+            FlinkPravegaWriter.Builder<PravegaRecord<byte[], byte[]>> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord<byte[], byte[]>>builder()
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
-                    .withSerializationSchema(new ByteArraySerializationFormat())
-                    .withEventRouter(event -> fixedRoutingKey) //comment this out for unordered write
-                    .withWriterMode(PravegaWriterMode.EXACTLY_ONCE)
-                    .build();
+                    .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));
+            if (fixedRoutingKey != null){
+                flinkPravegaWriterBuilder.withEventRouter(event -> fixedRoutingKey); //ordered write, single partition
+            }
+            else{
+                //ordered write, multi-partition. routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
+                flinkPravegaWriterBuilder.withEventRouter(event -> (event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition())));
+            }
+            flinkPravegaWriterBuilder.withWriterMode(PravegaWriterMode.EXACTLY_ONCE);
+
+            sink = flinkPravegaWriterBuilder.build();
             toOutput
                     .addSink(sink)
                     .uid("pravega-writer")
