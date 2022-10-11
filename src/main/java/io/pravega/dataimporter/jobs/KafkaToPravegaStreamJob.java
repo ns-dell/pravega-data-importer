@@ -19,7 +19,6 @@ import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserialization
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
@@ -57,7 +56,6 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
 //                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
-//                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
                     .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
                     .build();
 
