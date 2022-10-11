@@ -7,9 +7,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import java.util.function.Function;
 
 public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaDeserializationSchema<PravegaRecord> {
-
     private final Function<ConsumerRecord<byte[], byte[]>, PravegaRecord> function = consumerRecord ->
-            new PravegaRecord(consumerRecord.key(), consumerRecord.value(), consumerRecord.headers(), consumerRecord.partition());
+            new PravegaRecord(consumerRecord.key(),
+                    consumerRecord.value(),
+                    consumerRecord.headers(),
+                    consumerRecord.partition());
 
     @Override
     public boolean isEndOfStream(PravegaRecord nextElement) {
@@ -23,6 +25,6 @@ public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaD
 
     @Override
     public TypeInformation<PravegaRecord> getProducedType() {
-        return null;
+        return TypeInformation.of(PravegaRecord.class);
     }
 }

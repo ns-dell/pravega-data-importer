@@ -74,8 +74,6 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                             "Kafka consumer from " + getConfig().getParams().get("input-topic"));
 
             final FlinkPravegaWriter<PravegaRecord> sink;
-//            SerializationSchema<PravegaRecord<byte[], byte[]>> adapter = new PravegaSerializationSchema<>(
-//                    new JavaSerializer<>());
             FlinkPravegaWriter.Builder<PravegaRecord> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord>builder()
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
