@@ -6,23 +6,23 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.function.Function;
 
-public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaDeserializationSchema<PravegaRecord<byte[], byte[]>> {
+public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaDeserializationSchema<PravegaRecord> {
 
-    private final Function<ConsumerRecord<byte[], byte[]>, PravegaRecord<byte[], byte[]>> function = consumerRecord ->
-            new PravegaRecord<>(consumerRecord.key(), consumerRecord.value(), consumerRecord.headers(), consumerRecord.partition());
+    private final Function<ConsumerRecord<byte[], byte[]>, PravegaRecord> function = consumerRecord ->
+            new PravegaRecord(consumerRecord.key(), consumerRecord.value(), consumerRecord.headers(), consumerRecord.partition());
 
     @Override
-    public boolean isEndOfStream(PravegaRecord<byte[], byte[]> nextElement) {
+    public boolean isEndOfStream(PravegaRecord nextElement) {
         return false;
     }
 
     @Override
-    public PravegaRecord<byte[], byte[]> deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
+    public PravegaRecord deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
         return function.apply(record);
     }
 
     @Override
-    public TypeInformation<PravegaRecord<byte[], byte[]>> getProducedType() {
+    public TypeInformation<PravegaRecord> getProducedType() {
         return null;
     }
 }

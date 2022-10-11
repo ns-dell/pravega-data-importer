@@ -15,11 +15,9 @@ import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.connectors.flink.serialization.PravegaSerializationSchema;
 import io.pravega.dataimporter.AppConfiguration;
-import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
 import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserializationSchema;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -55,7 +53,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
 
             String bootstrap_servers = getConfig().getParams().get("bootstrap.servers","localhost:9092");
             String kafkaTopic = getConfig().getParams().get("input-topic");
-            final KafkaSource<PravegaRecord<byte[], byte[]>> kafkaSource = KafkaSource.<PravegaRecord<byte[], byte[]>>builder()
+            final KafkaSource<PravegaRecord> kafkaSource = KafkaSource.<PravegaRecord>builder()
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
 //                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
@@ -69,16 +67,16 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
 //                    "Kafka consumer from " + getConfig().getParams().get("input-topic")),
 //                    getConfig().getParams());
 
-            final DataStream<PravegaRecord<byte[], byte[]>> toOutput =
+            final DataStream<PravegaRecord> toOutput =
                     env.fromSource(
                             kafkaSource,
                             WatermarkStrategy.noWatermarks(),
                             "Kafka consumer from " + getConfig().getParams().get("input-topic"));
 
-            final FlinkPravegaWriter<PravegaRecord<byte[], byte[]>> sink;
+            final FlinkPravegaWriter<PravegaRecord> sink;
 //            SerializationSchema<PravegaRecord<byte[], byte[]>> adapter = new PravegaSerializationSchema<>(
 //                    new JavaSerializer<>());
-            FlinkPravegaWriter.Builder<PravegaRecord<byte[], byte[]>> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord<byte[], byte[]>>builder()
+            FlinkPravegaWriter.Builder<PravegaRecord> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord>builder()
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
                     .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));

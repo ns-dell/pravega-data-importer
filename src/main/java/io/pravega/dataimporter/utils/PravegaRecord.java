@@ -4,25 +4,25 @@ import org.apache.kafka.common.header.Headers;
 
 import java.io.Serializable;
 
-public class PravegaRecord<K, V> implements Serializable {
+public class PravegaRecord implements Serializable {
 
-    private final K key;
-    private final V value;
+    private final byte[] key;
+    private final byte[] value;
     private final Headers headers;
     private final int partition;
 
-    public PravegaRecord(K key, V value, Headers headers, int partition) {
+    public PravegaRecord(byte[] key, byte[] value, Headers headers, int partition) {
         this.key = key;
         this.value = value;
         this.headers = headers;
         this.partition = partition;
     }
 
-    public K getKey() {
+    public byte[] getKey() {
         return key;
     }
 
-    public V getValue() {
+    public byte[] getValue() {
         return value;
     }
 
