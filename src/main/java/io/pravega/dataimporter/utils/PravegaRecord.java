@@ -4,7 +4,6 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 
 public class PravegaRecord implements Serializable {

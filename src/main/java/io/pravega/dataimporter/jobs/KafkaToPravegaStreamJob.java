@@ -57,7 +57,8 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
 //                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
-                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
+//                    .setDeserializer(KafkaRecordDeserializationSchema.of(new ConsumerRecordByteArrayKafkaDeserializationSchema()))
+                    .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
                     .build();
 
 //            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
