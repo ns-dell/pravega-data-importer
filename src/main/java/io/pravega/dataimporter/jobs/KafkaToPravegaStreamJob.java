@@ -47,15 +47,14 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
             log.info("output stream: {}", outputStreamConfig);
 
-            final String fixedRoutingKey = getConfig().getParams().get("fixedRoutingKey");
-            log.info("fixedRoutingKey: {}", fixedRoutingKey);
+            final boolean isStreamOrdered = getConfig().getParams().getBoolean("isStreamOrdered", true);
+            log.info("isStreamOrdered: {}", isStreamOrdered);
 
             String bootstrap_servers = getConfig().getParams().get("bootstrap.servers","localhost:9092");
             String kafkaTopic = getConfig().getParams().get("input-topic");
             final KafkaSource<PravegaRecord> kafkaSource = KafkaSource.<PravegaRecord>builder()
                     .setBootstrapServers(bootstrap_servers)
                     .setTopics(Collections.singletonList(kafkaTopic))
-//                    .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new ByteArrayDeserializationFormat()))
                     .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
                     .build();
 
@@ -77,10 +76,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
                     .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));
-            if (fixedRoutingKey != null){
-                flinkPravegaWriterBuilder.withEventRouter(event -> fixedRoutingKey); //ordered write, single partition
-            }
-            else{
+            if (isStreamOrdered){
                 //ordered write, multi-partition. routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
                 flinkPravegaWriterBuilder.withEventRouter(event -> (event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition())));
             }
