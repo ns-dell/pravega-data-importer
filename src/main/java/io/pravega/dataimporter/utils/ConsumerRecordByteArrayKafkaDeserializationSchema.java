@@ -4,6 +4,9 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+
+import java.util.HashMap;
 
 public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaRecordDeserializationSchema<PravegaRecord> {
 
@@ -14,6 +17,10 @@ public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaR
 
     @Override
     public void deserialize(ConsumerRecord<byte[], byte[]> record, Collector<PravegaRecord> out) {
-        out.collect(new PravegaRecord(record.key(), record.value(), record.headers(), record.partition()));
+        HashMap<String, byte[]> headers = new HashMap<>();
+        for (Header header: record.headers()){
+            headers.put(header.key(), header.value());
+        }
+        out.collect(new PravegaRecord(record.key(), record.value(), headers, record.partition()));
     }
 }
