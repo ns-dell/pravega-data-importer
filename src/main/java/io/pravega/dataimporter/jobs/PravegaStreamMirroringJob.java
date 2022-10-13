@@ -22,7 +22,6 @@ import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
-import io.pravega.dataimporter.utils.Filters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
@@ -67,16 +66,14 @@ public class PravegaStreamMirroringJob extends AbstractJob {
                     .uid("pravega-reader")
                     .name("Pravega reader from " + inputStreamConfig.getStream().getScopedName());
 
-            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(events, getConfig().getParams());
-
             final FlinkPravegaWriter<byte[]> sink = FlinkPravegaWriter.<byte[]>builder()
                     .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                     .forStream(outputStreamConfig.getStream())
                     .withSerializationSchema(new ByteArraySerializationFormat())
-                    .withEventRouter(event -> fixedRoutingKey)
+                    .withEventRouter(event -> Thread.currentThread().getName())
                     .withWriterMode(PravegaWriterMode.EXACTLY_ONCE)
                     .build();
-            toOutput.addSink(sink)
+            events.addSink(sink)
                     .uid("pravega-writer")
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
