@@ -78,15 +78,22 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
+    // https://mvnrepository.com/artifact/net.mguenther.kafka/kafka-junit
+    testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
+    // https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter
+    testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
 
-    testCompileOnly "org.apache.flink:flink-test-utils:${flinkVersion}"
-    testCompileOnly "junit:junit:${junitVersion}"
+    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
     flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
 
     // Schema registry dependencies required due to https://github.com/pravega/flink-connectors/issues/440
     flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+    testCompileOnly "junit:junit:${junitVersion}"
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 }
 
 // make compileOnly dependencies available for tests:
