@@ -108,3 +108,7 @@ jar {
                 'Build-Jdk': System.getProperty('java.version')
     }
 }
+
+test {
+    useJUnitPlatform()
+}
