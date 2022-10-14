@@ -29,15 +29,10 @@ public class PravegaStreamMirroringJobTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    private static final String PRAVEGA_VERSION = "0.12.0";
-    public static final int LOCAL_CONTROLLER_PORT = 9090;
-    public static final int LOCAL_SEGMENT_STORE_PORT = 12345;
-    public static final int REMOTE_CONTROLLER_PORT = 9990;
-    public static final int REMOTE_SEGMENT_STORE_PORT = 23456;
-    public static final String PRAVEGA_IMAGE = "pravega/pravega:" + PRAVEGA_VERSION;
-
     @Test
     public void TestPravegaStreamMirroringJob() {
+
+        //TODO: add code for flink job submission
 
         PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345);
         localTestResource.start();
@@ -47,9 +42,9 @@ public class PravegaStreamMirroringJobTest {
         ClientConfig localClientConfig = ClientConfig.builder()
                 .controllerURI(localControllerURI).build();
         EventWriterConfig writerConfig = EventWriterConfig.builder().build();
-        EventStreamClientFactory factory = EventStreamClientFactory
+        EventStreamClientFactory localFactory = EventStreamClientFactory
                 .withScope(localTestResource.getStreamScope(), localClientConfig);
-        EventStreamWriter<PravegaRecord> localWriter = factory
+        EventStreamWriter<PravegaRecord> localWriter = localFactory
                 .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());
@@ -73,7 +68,9 @@ public class PravegaStreamMirroringJobTest {
                 .stream(remoteTestResource.getStreamScope() + "/" + remoteTestResource.getStreamName()).build();
         readerGroupManager.createReaderGroup("remoteReader", readerGroupConfig);
 
-        EventStreamReader<PravegaRecord> reader = factory
+        EventStreamClientFactory remoteFactory = EventStreamClientFactory
+                .withScope(remoteTestResource.getStreamScope(), remoteClientConfig);
+        EventStreamReader<PravegaRecord> reader = remoteFactory
                 .createReader("remoteReaderId", "remoteReader",
                         new JavaSerializer<>(), ReaderConfig.builder().build());
 
