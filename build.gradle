@@ -17,6 +17,7 @@ apply plugin: "java"
 apply plugin: "application"
 apply plugin: "maven-publish"
 apply plugin: "com.github.johnrengelman.shadow"
+apply from: "$rootDir/gradle/checkstyle.gradle"
 
 group = "io.pravega"
 description = "Pravega Flink Tools"
