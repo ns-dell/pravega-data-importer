@@ -70,8 +70,7 @@ flink run build/libs/pravega-data-importer-1.0-SNAPSHOT.jar \
   --input-stream examples/network \
   --input-startAtTail false \
   --output-stream examples2/network-cloud \
-  --output-controller tcp://127.0.0.1:9990 \
-  --fixedRoutingKey edge1
+  --output-controller tcp://127.0.0.1:9990
 ```
 
 ## Kafka-Stream-Mirroring: Continuously copying a Pravega stream to another Pravega stream
@@ -103,5 +102,5 @@ flink run build/libs/pravega-data-importer-1.0-SNAPSHOT.jar \
   --bootstrap.servers localhost:9092 \
   --output-stream examples/from-kafka \
   --output-controller tcp://127.0.0.1:9090 \
-  --fixedRoutingKey edge1
+  --isStreamOrdered true
 ```
