@@ -9,8 +9,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Runs a standalone Pravega cluster in-process.
@@ -38,11 +36,11 @@ public class PravegaTestResource {
                 .withFixedExposedPort(this.controllerPort, this.controllerPort)
                 .withFixedExposedPort(this.segmentStorePort, this.segmentStorePort)
                 .withStartupTimeout(Duration.ofSeconds(90))
-                .waitingFor(Wait.forLogMessage(".*Starting gRPC server listening on port: 9090.*", 1))
+                .waitingFor(Wait.forLogMessage(".*Started gRPC server listening on port: " + controllerPort +".*", 1))
                 .withCommand("standalone");
     }
 
-    public Map<String, String> start() {
+    public void start() {
         container.start();
 
         try (final StreamManager streamManager = StreamManager.create(URI.create(getControllerUri()))) {
@@ -52,8 +50,6 @@ public class PravegaTestResource {
                     .build();
             streamManager.createStream(streamScope, streamName, streamConfig);
         }
-
-        return Collections.singletonMap("pravega.controller.uri", getControllerUri());
     }
 
     public void stop() {
