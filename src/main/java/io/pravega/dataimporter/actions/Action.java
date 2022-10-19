@@ -17,7 +17,7 @@ package io.pravega.dataimporter.actions;
 
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamConfiguration;
-import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.client.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
 
 /**

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter;
+package io.pravega.dataimporter.client;
 
 import io.pravega.dataimporter.actions.Action;
 import io.pravega.dataimporter.actions.ActionFactory;

@@ -18,7 +18,7 @@ package io.pravega.dataimporter.jobs;
 import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamCut;
-import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.client.AppConfiguration;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.LocalEnvironment;

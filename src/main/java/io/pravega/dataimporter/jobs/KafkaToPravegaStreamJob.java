@@ -14,7 +14,7 @@ import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.connectors.flink.serialization.PravegaSerializationSchema;
-import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.client.AppConfiguration;
 import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserializationSchema;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -57,13 +57,6 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .setTopics(Collections.singletonList(kafkaTopic))
                     .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
                     .build();
-
-//            final DataStream<byte[]> toOutput = Filters.dynamicByteArrayFilter(
-//                    env.fromSource(
-//                        kafkaSource,
-//                        WatermarkStrategy.noWatermarks(),
-//                    "Kafka consumer from " + getConfig().getParams().get("input-topic")),
-//                    getConfig().getParams());
 
             final DataStream<PravegaRecord> toOutput =
                     env.fromSource(
