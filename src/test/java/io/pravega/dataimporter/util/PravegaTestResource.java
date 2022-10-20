@@ -23,20 +23,22 @@ public class PravegaTestResource {
     private final int controllerPort;
     private final int segmentStorePort;
     private static final String PRAVEGA_IMAGE = "pravega/pravega:" + PRAVEGA_VERSION;
-    private String streamScope;
-    private String streamName;
+    private final String streamScope;
+    private final String streamName;
     private final GenericContainer<?> container;
 
     @SuppressWarnings("deprecation")
-    public PravegaTestResource(int controllerPort, int segmentStorePort){
+    public PravegaTestResource(int controllerPort, int segmentStorePort, String streamScope, String streamName){
         this.controllerPort = controllerPort;
         this.segmentStorePort = segmentStorePort;
+        this.streamScope = streamScope;
+        this.streamName = streamName;
 
         container = new FixedHostPortGenericContainer<>(PRAVEGA_IMAGE)
-                .withFixedExposedPort(this.controllerPort, this.controllerPort)
-                .withFixedExposedPort(this.segmentStorePort, this.segmentStorePort)
+                .withFixedExposedPort(this.controllerPort, 9090)
+                .withFixedExposedPort(this.segmentStorePort, 12345)
                 .withStartupTimeout(Duration.ofSeconds(90))
-                .waitingFor(Wait.forLogMessage(".*Started gRPC server listening on port: " + controllerPort +".*", 1))
+                .waitingFor(Wait.forLogMessage(".*Pravega Sandbox is running locally now. You could access it at 127.0.0.1:" + 9090 +".*", 1))
                 .withCommand("standalone");
     }
 
@@ -64,7 +66,7 @@ public class PravegaTestResource {
     }
 
     public String getControllerUri() {
-        return "tcp://" + container.getHost() + ":" + container.getMappedPort(controllerPort);
+        return "tcp://" + container.getHost() + ":" + container.getMappedPort(9090);
     }
 
     public int getControllerPort() {

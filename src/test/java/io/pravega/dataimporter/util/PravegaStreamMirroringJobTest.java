@@ -9,7 +9,6 @@ import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,8 @@ import java.util.HashMap;
 public class PravegaStreamMirroringJobTest {
 
     final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJobTest.class);
+
+    private static final int READER_TIMEOUT_MS = 2000;
 
     @ClassRule
     public static MiniClusterWithClientResource flinkCluster =
@@ -34,7 +35,7 @@ public class PravegaStreamMirroringJobTest {
 
         //TODO: add code for flink job submission
 
-        PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345);
+        PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345, "localScope", "localStream");
         localTestResource.start();
 
         URI localControllerURI = URI.create(localTestResource.getControllerUri());
@@ -55,33 +56,43 @@ public class PravegaStreamMirroringJobTest {
         localWriter.writeEvent(new PravegaRecord("key3".getBytes(),"value3".getBytes(),headers,3));
         localWriter.flush();
 
-        PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456);
+        PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456, "remoteScope", "remoteStream");
         remoteTestResource.start();
 
         URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());
-        ClientConfig remoteClientConfig = ClientConfig.builder()
-                .controllerURI(remoteControllerURI).build();
 
-        ReaderGroupManager readerGroupManager = ReaderGroupManager
-                .withScope(remoteTestResource.getStreamScope(), remoteClientConfig);
-        ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(remoteTestResource.getStreamScope() + "/" + remoteTestResource.getStreamName()).build();
-        readerGroupManager.createReaderGroup("remoteReader", readerGroupConfig);
-
-        EventStreamClientFactory remoteFactory = EventStreamClientFactory
-                .withScope(remoteTestResource.getStreamScope(), remoteClientConfig);
-        EventStreamReader<PravegaRecord> reader = remoteFactory
-                .createReader("remoteReaderId", "remoteReader",
-                        new JavaSerializer<>(), ReaderConfig.builder().build());
-
-        PravegaRecord recordEvent;
-        int counter = 0;
-        while ((recordEvent = reader.readNextEvent(1000).getEvent()) != null) {
-            log.info(recordEvent.toString());
-            counter++;
+        final String readerGroup = "remoteReaderGroup";
+        final String readerId = "remoteReader";
+        final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
+                .stream(Stream.of(remoteTestResource.getStreamScope(), remoteTestResource.getStreamName()))
+                .build();
+        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(remoteTestResource.getStreamScope(), remoteControllerURI)) {
+            readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
         }
-        Assertions.assertEquals(3, counter);
 
-        reader.close();
+        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(remoteTestResource.getStreamScope(),
+                ClientConfig.builder().controllerURI(remoteControllerURI).build());
+             EventStreamReader<byte[]> reader = clientFactory.createReader(readerId,
+                     readerGroup,
+                     new JavaSerializer<>(),
+                     ReaderConfig.builder().build())) {
+            log.info("Reading all the events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
+            EventRead<byte[]> event = null;
+            do {
+                try {
+                    event = reader.readNextEvent(READER_TIMEOUT_MS);
+                    if (event.getEvent() != null) {
+                        log.info("Read event '{}'%n", new String(event.getEvent()));
+                    }
+                } catch (ReinitializationRequiredException e) {
+                    //There are certain circumstances where the reader needs to be reinitialized
+                    e.printStackTrace();
+                }
+            } while (event.getEvent() != null);
+            log.info("No more events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
+        }
+
+        localTestResource.stop();
+        remoteTestResource.stop();
     }
 }

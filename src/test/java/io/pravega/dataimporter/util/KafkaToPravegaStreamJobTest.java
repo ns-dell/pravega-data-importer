@@ -55,7 +55,7 @@ public class KafkaToPravegaStreamJobTest {
         headers.put("h1", "v1".getBytes());
         kafka.send(to("test-input", new PravegaRecord("key1".getBytes(),"value1".getBytes(),headers,1)));
 
-        PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456);
+        PravegaTestResource remoteTestResource = new PravegaTestResource(9090, 12345, "remoteScope", "remoteStream");
         remoteTestResource.start();
 
         URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());
