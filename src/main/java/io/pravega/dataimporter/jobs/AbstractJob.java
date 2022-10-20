@@ -51,7 +51,7 @@ public abstract class AbstractJob implements Runnable {
     /**
      * Get head and tail stream cuts for a Pravega stream.
      */
-    public StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
+    public static StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
         try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
             return streamManager.getStreamInfo(streamConfig.getStream().getScope(), streamConfig.getStream().getStreamName());
         }
@@ -61,7 +61,7 @@ public abstract class AbstractJob implements Runnable {
      * Convert UNBOUNDED start StreamCut to a concrete StreamCut, pointing to the current head or tail of the stream
      * (depending on isStartAtTail).
      */
-    public StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
+    public static StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isStartAtTail()) {
             return getStreamInfo(streamConfig).getTailStreamCut();
         } else if (streamConfig.getStartStreamCut() == StreamCut.UNBOUNDED) {
@@ -76,7 +76,7 @@ public abstract class AbstractJob implements Runnable {
      * pointing to the current tail of the stream.
      * For unbounded reads, returns UNBOUNDED.
      */
-    public StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
+    public static StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isEndAtTail()) {
             return getStreamInfo(streamConfig).getTailStreamCut();
         } else {

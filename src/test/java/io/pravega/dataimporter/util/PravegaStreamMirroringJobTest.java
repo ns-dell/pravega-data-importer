@@ -5,15 +5,23 @@ import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
-import io.pravega.dataimporter.client.Main;
+import io.pravega.connectors.flink.FlinkPravegaReader;
+import io.pravega.connectors.flink.FlinkPravegaWriter;
+import io.pravega.connectors.flink.PravegaWriterMode;
+import io.pravega.dataimporter.client.AppConfiguration;
+import io.pravega.dataimporter.jobs.AbstractJob;
+import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -43,13 +51,38 @@ public class PravegaStreamMirroringJobTest {
                 " --output-controller tcp://127.0.0.1:9990";
         String[] args = argString.split("\\s+");
 
+        AppConfiguration appConfiguration;
+
+        try {
+            appConfiguration = new AppConfiguration(args);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345, "localScope", "localStream");
         localTestResource.start();
 
         PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456, "remoteScope", "remoteStream");
         remoteTestResource.start();
 
-        Main.main(args);
+        final AppConfiguration.StreamConfig inputStreamConfig = appConfiguration.getStreamConfig("input");
+        final AppConfiguration.StreamConfig outputStreamConfig = appConfiguration.getStreamConfig("output");
+        final StreamCut startStreamCut = AbstractJob.resolveStartStreamCut(inputStreamConfig);
+        final StreamCut endStreamCut = AbstractJob.resolveEndStreamCut(inputStreamConfig);
+
+        final FlinkPravegaReader<byte[]> source = PravegaStreamMirroringJob.createFlinkPravegaReader(inputStreamConfig,startStreamCut,endStreamCut);
+        final FlinkPravegaWriter<byte[]> sink = PravegaStreamMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
+
+        StreamExecutionEnvironment testEnvironment = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        final DataStream<byte[]> events = testEnvironment
+                .addSource(source)
+                .uid("test-reader")
+                .name("Test Pravega reader from " + inputStreamConfig.getStream().getScopedName());
+
+        events.addSink(sink)
+                .uid("test-writer")
+                .name("Test Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
         URI localControllerURI = URI.create(localTestResource.getControllerUri());
 

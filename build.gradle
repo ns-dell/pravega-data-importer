@@ -24,7 +24,7 @@ description = "Pravega Flink Tools"
 
 // Allow main class name to be specified with -PmainClass=xxx.
 application {
-    mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.Main"
+    mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.client.Main"
 }
 
 group 'org.example'
