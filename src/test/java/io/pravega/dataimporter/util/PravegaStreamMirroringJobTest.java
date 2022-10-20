@@ -40,7 +40,7 @@ public class PravegaStreamMirroringJobTest {
                             .build());
 
     @Test
-    public void TestPravegaStreamMirroringJob() {
+    public void TestPravegaStreamMirroringJob() throws Exception {
 
         //TODO: add code for flink job submission
         String argString = "--action-type stream-mirroring" +
@@ -83,6 +83,8 @@ public class PravegaStreamMirroringJobTest {
         events.addSink(sink)
                 .uid("test-writer")
                 .name("Test Pravega writer to " + outputStreamConfig.getStream().getScopedName());
+
+        testEnvironment.execute("TestPravegaStreamMirroringJob");
 
         URI localControllerURI = URI.create(localTestResource.getControllerUri());
 
