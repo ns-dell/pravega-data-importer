@@ -22,12 +22,17 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // When this method is executed, we should expect the following:
         // 1. Parameters specifying the job to be executed (e.g., mirroring, import)
         // 2. Parameters specifying the required metadata information for a given job (e.g., origin/target cluster endpoints)
         // 3. Parameters related to the Flink job itself to be executed (e.g., parallelism)
-        AppConfiguration configuration = new AppConfiguration(args);
+        AppConfiguration configuration;
+        try {
+            configuration = new AppConfiguration(args);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // STEP 1: Instantiate the Action based on input parameter
         String actionType = configuration.getParams().get("action-type");

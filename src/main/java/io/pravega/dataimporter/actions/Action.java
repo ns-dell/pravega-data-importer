@@ -37,7 +37,7 @@ public abstract class Action {
     public abstract String getJobName();
 
     public void submitDataImportJob() {
-        // TODO: Logic to submit a job to run in FLink programmatically
+        // TODO: Logic to submit a job to run in Flink programmatically
         job.run();
     }
 
