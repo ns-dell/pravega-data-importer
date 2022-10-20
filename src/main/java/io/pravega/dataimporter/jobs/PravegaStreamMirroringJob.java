@@ -23,8 +23,10 @@ import io.pravega.dataimporter.client.AppConfiguration;
 import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
 import io.pravega.dataimporter.utils.PravegaRecord;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,33 @@ public class PravegaStreamMirroringJob extends AbstractJob {
         env = initializeFlinkStreaming();
     }
 
+    public PravegaStreamMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
+        super(appConfiguration);
+        this.env = env;
+    }
+
+    public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig, StreamCut startStreamCut, StreamCut endStreamCut){
+        return FlinkPravegaReader.<byte[]>builder()
+                .withPravegaConfig(inputStreamConfig.getPravegaConfig())
+                .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)
+                .withDeserializationSchema(new ByteArrayDeserializationFormat())
+                .build();
+    }
+
+    public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig, boolean isStreamOrdered, PravegaWriterMode pravegaWriterMode){
+        FlinkPravegaWriter.Builder<byte[]> flinkPravegaWriterBuilder = FlinkPravegaWriter.<byte[]>builder()
+                .withPravegaConfig(outputStreamConfig.getPravegaConfig())
+                .forStream(outputStreamConfig.getStream())
+                .withSerializationSchema(new ByteArraySerializationFormat());
+        if (isStreamOrdered) {
+            //ordered write, multi-partition. routing key taken from current thread name
+            flinkPravegaWriterBuilder.withEventRouter(event -> Thread.currentThread().getName());
+        }
+        flinkPravegaWriterBuilder.withWriterMode(pravegaWriterMode);
+
+        return flinkPravegaWriterBuilder.build();
+    }
+
     public void run() {
         try {
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
@@ -57,28 +86,14 @@ public class PravegaStreamMirroringJob extends AbstractJob {
             final boolean isStreamOrdered = getConfig().getParams().getBoolean("isStreamOrdered", true);
             log.info("isStreamOrdered: {}", isStreamOrdered);
 
-            final FlinkPravegaReader<byte[]> flinkPravegaReader = FlinkPravegaReader.<byte[]>builder()
-                    .withPravegaConfig(inputStreamConfig.getPravegaConfig())
-                    .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)
-                    .withDeserializationSchema(new ByteArrayDeserializationFormat())
-                    .build();
+            final FlinkPravegaReader<byte[]> flinkPravegaReader = createFlinkPravegaReader(inputStreamConfig, startStreamCut, endStreamCut);
             final DataStream<byte[]> events = env
                     .addSource(flinkPravegaReader)
                     .uid("pravega-reader")
                     .name("Pravega reader from " + inputStreamConfig.getStream().getScopedName());
 
-            final FlinkPravegaWriter<byte[]> sink;
-            FlinkPravegaWriter.Builder<byte[]> flinkPravegaWriterBuilder = FlinkPravegaWriter.<byte[]>builder()
-                    .withPravegaConfig(outputStreamConfig.getPravegaConfig())
-                    .forStream(outputStreamConfig.getStream())
-                    .withSerializationSchema(new ByteArraySerializationFormat());
-            if (isStreamOrdered) {
-                //ordered write, multi-partition. routing key taken from current thread name
-                flinkPravegaWriterBuilder.withEventRouter(event -> Thread.currentThread().getName());
-            }
-            flinkPravegaWriterBuilder.withWriterMode(PravegaWriterMode.EXACTLY_ONCE);
+            final FlinkPravegaWriter<byte[]> sink = createFlinkPravegaWriter(outputStreamConfig, isStreamOrdered, PravegaWriterMode.EXACTLY_ONCE);
 
-            sink = flinkPravegaWriterBuilder.build();
             events.addSink(sink)
                     .uid("pravega-writer")
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
