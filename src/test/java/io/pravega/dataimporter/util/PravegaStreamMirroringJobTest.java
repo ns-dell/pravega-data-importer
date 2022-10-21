@@ -73,7 +73,7 @@ public class PravegaStreamMirroringJobTest {
         final FlinkPravegaReader<byte[]> source = PravegaStreamMirroringJob.createFlinkPravegaReader(inputStreamConfig,startStreamCut,endStreamCut);
         final FlinkPravegaWriter<byte[]> sink = PravegaStreamMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
 
-        StreamExecutionEnvironment testEnvironment = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment testEnvironment = AbstractJob.initializeFlinkStreaming(appConfiguration);
 
         final DataStream<byte[]> events = testEnvironment
                 .addSource(source)
@@ -95,14 +95,22 @@ public class PravegaStreamMirroringJobTest {
                 .withScope(localTestResource.getStreamScope(), localClientConfig);
         EventStreamWriter<PravegaRecord> localWriter = localFactory
                 .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
+        log.info("Writing the events to {}/{}%n", localTestResource.getStreamScope(), localTestResource.getStreamName());
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key1".getBytes(), "value1".getBytes(), headers, 1,"test-topic", 1));
+        PravegaRecord writeEvent = new PravegaRecord("key1".getBytes(), "value1".getBytes(), headers, 1, "test-topic", 1);
+        localWriter.writeEvent(writeEvent);
+        log.info("Wrote event {}%n", writeEvent);
         headers.put("h2", "v2".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key2".getBytes(), "value2".getBytes(), headers, 2, "test-topic", 2));
+        writeEvent = new PravegaRecord("key2".getBytes(), "value2".getBytes(), headers, 2, "test-topic", 2);
+        localWriter.writeEvent(writeEvent);
+        log.info("Wrote event {}%n", writeEvent);
         headers.put("h3", "v3".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key3".getBytes(), "value3".getBytes(), headers, 3, "test-topic", 3));
+        writeEvent = new PravegaRecord("key3".getBytes(), "value3".getBytes(), headers, 3, "test-topic", 3);
+        localWriter.writeEvent(writeEvent);
+        log.info("Wrote event {}%n", writeEvent);
         localWriter.flush();
+        localWriter.close();
 
 
         URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());

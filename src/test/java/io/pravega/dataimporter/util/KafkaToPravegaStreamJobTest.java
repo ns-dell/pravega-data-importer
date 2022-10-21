@@ -49,7 +49,6 @@ public class KafkaToPravegaStreamJobTest {
 
     @Test
     public void TestKafkaToPravegaStreamJob() throws InterruptedException {
-        //TODO: add code for flink job submission
 
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());

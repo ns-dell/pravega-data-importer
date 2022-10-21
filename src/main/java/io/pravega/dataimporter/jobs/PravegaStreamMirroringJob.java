@@ -45,7 +45,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
 
     public PravegaStreamMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
-        env = initializeFlinkStreaming();
+        env = initializeFlinkStreaming(appConfiguration);
     }
 
     public PravegaStreamMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {

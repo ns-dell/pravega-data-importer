@@ -84,21 +84,21 @@ public abstract class AbstractJob implements Runnable {
         }
     }
 
-    public StreamExecutionEnvironment initializeFlinkStreaming() {
+    public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // Make parameters show in Flink UI.
-        env.getConfig().setGlobalJobParameters(getConfig().getParams());
+        env.getConfig().setGlobalJobParameters(config.getParams());
 
-        env.setParallelism(getConfig().getParallelism());
+        env.setParallelism(config.getParallelism());
         log.info("Parallelism={}, MaxParallelism={}", env.getParallelism(), env.getMaxParallelism());
 
-        if (!getConfig().isEnableOperatorChaining()) {
+        if (!config.isEnableOperatorChaining()) {
             env.disableOperatorChaining();
         }
-        if (getConfig().isEnableCheckpoint()) {
-            env.enableCheckpointing(getConfig().getCheckpointIntervalMs(), CheckpointingMode.EXACTLY_ONCE);
-            env.getCheckpointConfig().setMinPauseBetweenCheckpoints(getConfig().getCheckpointIntervalMs() / 2);
-            env.getCheckpointConfig().setCheckpointTimeout(getConfig().getCheckpointTimeoutMs());
+        if (config.isEnableCheckpoint()) {
+            env.enableCheckpointing(config.getCheckpointIntervalMs(), CheckpointingMode.EXACTLY_ONCE);
+            env.getCheckpointConfig().setMinPauseBetweenCheckpoints(config.getCheckpointIntervalMs() / 2);
+            env.getCheckpointConfig().setCheckpointTimeout(config.getCheckpointTimeoutMs());
             // A checkpoint failure will cause the job to fail.
             env.getCheckpointConfig().setTolerableCheckpointFailureNumber(0);
             // If the job is cancelled manually by the user, do not delete the checkpoint.
@@ -118,7 +118,7 @@ public abstract class AbstractJob implements Runnable {
             log.warn("Using noRestart restart strategy");
             env.setRestartStrategy(RestartStrategies.noRestart());
             // Initialize Hadoop file system.
-            FileSystem.initialize(getConfig().getParams().getConfiguration());
+            FileSystem.initialize(config.getParams().getConfiguration());
         }
         return env;
     }
