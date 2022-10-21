@@ -9,12 +9,16 @@ public class PravegaRecord implements Serializable {
     private final byte[] value;
     private final HashMap<String, byte[]> headers;
     private final int partition;
+    private final String topic;
+    private final long timestamp;
 
-    public PravegaRecord(byte[] key, byte[] value, HashMap<String, byte[]> headers, int partition) {
+    public PravegaRecord(byte[] key, byte[] value, HashMap<String, byte[]> headers, int partition, String topic, long timestamp) {
         this.key = key;
         this.value = value;
         this.partition = partition;
         this.headers = headers;
+        this.topic = topic;
+        this.timestamp = timestamp;
     }
 
     public byte[] getKey() {
@@ -32,4 +36,13 @@ public class PravegaRecord implements Serializable {
     public int getPartition() {
         return partition;
     }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
 }

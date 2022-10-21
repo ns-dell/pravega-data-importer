@@ -97,11 +97,11 @@ public class PravegaStreamMirroringJobTest {
                 .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key1".getBytes(), "value1".getBytes(), headers, 1));
+        localWriter.writeEvent(new PravegaRecord("key1".getBytes(), "value1".getBytes(), headers, 1,"test-topic", 1));
         headers.put("h2", "v2".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key2".getBytes(), "value2".getBytes(), headers, 2));
+        localWriter.writeEvent(new PravegaRecord("key2".getBytes(), "value2".getBytes(), headers, 2, "test-topic", 2));
         headers.put("h3", "v3".getBytes());
-        localWriter.writeEvent(new PravegaRecord("key3".getBytes(), "value3".getBytes(), headers, 3));
+        localWriter.writeEvent(new PravegaRecord("key3".getBytes(), "value3".getBytes(), headers, 3, "test-topic", 3));
         localWriter.flush();
 
 

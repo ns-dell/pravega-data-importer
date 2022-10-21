@@ -53,7 +53,7 @@ public class KafkaToPravegaStreamJobTest {
 
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());
-        kafka.send(to("test-input", new PravegaRecord("key1".getBytes(),"value1".getBytes(),headers,1)));
+        kafka.send(to("test-input", new PravegaRecord("key1".getBytes(),"value1".getBytes(),headers,1, "test-topic",123456)));
 
         PravegaTestResource remoteTestResource = new PravegaTestResource(9090, 12345, "remoteScope", "remoteStream");
         remoteTestResource.start();

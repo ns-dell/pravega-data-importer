@@ -21,6 +21,6 @@ public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaR
         for (Header header: record.headers()){
             headers.put(header.key(), header.value());
         }
-        out.collect(new PravegaRecord(record.key(), record.value(), headers, record.partition()));
+        out.collect(new PravegaRecord(record.key(), record.value(), headers, record.partition(), record.topic(), record.timestamp()));
     }
 }
