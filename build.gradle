@@ -117,6 +117,13 @@ jar {
     }
 }
 
+task copyToLib(type: Copy) {
+    into "flinkJarTarget"
+    from shadowJar
+}
+
 test {
     useJUnitPlatform()
 }
+
+build.dependsOn(copyToLib)
