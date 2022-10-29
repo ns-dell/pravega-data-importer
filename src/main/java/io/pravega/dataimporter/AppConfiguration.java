@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter.client;
+package io.pravega.dataimporter;
 
 import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.Stream;

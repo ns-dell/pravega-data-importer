@@ -14,7 +14,7 @@ import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.connectors.flink.serialization.PravegaSerializationSchema;
-import io.pravega.dataimporter.client.AppConfiguration;
+import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserializationSchema;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;

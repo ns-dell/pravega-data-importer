@@ -15,7 +15,7 @@
  */
 package io.pravega.dataimporter.actions;
 
-import io.pravega.dataimporter.client.AppConfiguration;
+import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
