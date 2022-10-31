@@ -118,7 +118,7 @@ jar {
 }
 
 task copyToLib(type: Copy) {
-    into "flinkJarTarget"
+    into "lib"
     from shadowJar
 }
 

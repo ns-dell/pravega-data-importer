@@ -88,7 +88,7 @@ public abstract class AbstractJob implements Runnable {
 //        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         String host = config.getParams().get("flinkHost", "localhost");
         int port = config.getParams().getInt("flinkPort", 8081);
-        String jarFiles = "flinkJarTarget/pravega-data-importer-1.0-SNAPSHOT.jar";
+        String jarFiles = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment(host,port,jarFiles);
         // Make parameters show in Flink UI.
         env.getConfig().setGlobalJobParameters(config.getParams());
