@@ -96,7 +96,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
             log.info("Executing {} job", jobName);
-            env.execute(jobName);
+            env.executeAsync(jobName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
