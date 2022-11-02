@@ -87,12 +87,17 @@ public abstract class AbstractJob{
         }
     }
 
-    public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config) {
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config, boolean remoteCluster) {
+        StreamExecutionEnvironment env;
         String host = config.getParams().get("flinkHost", "localhost");
         int port = config.getParams().getInt("flinkPort", 8081);
         String jarFiles = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment(host,port,jarFiles);
+        if (remoteCluster){
+            env = StreamExecutionEnvironment.createRemoteEnvironment(host,port,jarFiles);
+        }
+        else {
+            env = StreamExecutionEnvironment.getExecutionEnvironment();
+        }
         // Make parameters show in Flink UI.
         env.getConfig().setGlobalJobParameters(config.getParams());
 

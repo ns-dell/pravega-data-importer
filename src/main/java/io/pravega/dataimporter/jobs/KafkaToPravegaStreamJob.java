@@ -40,7 +40,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
 
     public KafkaToPravegaStreamJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
-        env = initializeFlinkStreaming(appConfiguration);
+        env = initializeFlinkStreaming(appConfiguration, true);
     }
 
     public KafkaToPravegaStreamJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {

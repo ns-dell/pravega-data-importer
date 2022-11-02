@@ -40,10 +40,11 @@ public class PravegaTestResource {
                 .withStartupTimeout(Duration.ofSeconds(90))
                 .waitingFor(Wait.forLogMessage(".*Pravega Sandbox is running locally now. You could access it at 127.0.0.1:" + 9090 +".*", 1))
                 .withCommand("standalone");
+        container.start();
     }
 
     public void start() {
-        container.start();
+//        container.start();
 
         try (final StreamManager streamManager = StreamManager.create(URI.create(getControllerUri()))) {
             streamManager.createScope(streamScope);
