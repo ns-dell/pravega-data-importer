@@ -22,6 +22,7 @@ import io.pravega.dataimporter.AppConfiguration;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.LocalEnvironment;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An abstract job class for Flink Pravega applications.
  */
-public abstract class AbstractJob implements Runnable {
+public abstract class AbstractJob{
     final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
     private final AppConfiguration config;
@@ -47,6 +48,8 @@ public abstract class AbstractJob implements Runnable {
     public AppConfiguration getConfig() {
         return config;
     }
+
+    public abstract JobClient run();
 
     /**
      * Get head and tail stream cuts for a Pravega stream.

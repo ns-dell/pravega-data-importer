@@ -24,8 +24,6 @@ public class ActionFactory {
 
             case MirroringAction.NAME:
                 return new MirroringAction(configuration);
-            case ImportAction.NAME:
-                return new ImportAction();
             case KafkaMirroringAction.NAME:
                 return new KafkaMirroringAction(configuration);
             default:

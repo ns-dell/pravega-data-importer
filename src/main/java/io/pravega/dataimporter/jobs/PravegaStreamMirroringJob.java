@@ -22,6 +22,7 @@ import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
         return flinkPravegaWriterBuilder.build();
     }
 
-    public void run() {
+    public JobClient run() {
         try {
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
 
@@ -96,7 +97,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
             log.info("Executing {} job", jobName);
-            env.executeAsync(jobName);
+            return env.executeAsync(jobName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

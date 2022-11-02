@@ -19,6 +19,7 @@ import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserialization
 import io.pravega.dataimporter.utils.PravegaRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
         this.env = env;
     }
 
-    public void run() {
+    public JobClient run() {
         try {
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
             log.info("output stream: {}", outputStreamConfig);
@@ -87,7 +88,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
                     .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
             log.info("Executing {} job", jobName);
-            env.executeAsync(jobName);
+            return env.executeAsync(jobName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

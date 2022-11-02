@@ -19,11 +19,16 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
+import org.apache.flink.core.execution.JobClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Interface that all Actions should implement (mirroring, importing, etc.).
  */
 public abstract class Action {
+
+    final private static Logger log = LoggerFactory.getLogger(Action.class);
 
     protected AbstractJob job;
 
@@ -36,9 +41,12 @@ public abstract class Action {
 
     public abstract String getJobName();
 
+    /**
+     * Submits Flink job to Flink cluster, and logs the {@link org.apache.flink.api.common.JobID} of the submitted job.
+     */
     public void submitDataImportJob() {
-        // TODO: Logic to submit a job to run in Flink programmatically
-        job.run();
+        JobClient jobClient = job.run();
+        log.info("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
     }
 
     /**
