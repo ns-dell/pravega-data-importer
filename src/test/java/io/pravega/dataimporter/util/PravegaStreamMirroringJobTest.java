@@ -97,10 +97,9 @@ public class PravegaStreamMirroringJobTest {
         EventStreamWriter<byte[]> localWriter = localFactory
                 .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
         for (byte[] testValue: testValues){
-            localWriter.writeEvent(testValue);
+            localWriter.writeEvent(testValue).join();
             log.info("Wrote event {}%n", testValue);
         }
-        localWriter.flush();
         localWriter.close();
 
 

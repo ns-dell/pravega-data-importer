@@ -35,7 +35,7 @@ public class Main {
         }
 
         // STEP 1: Instantiate the Action based on input parameter
-        String actionType = configuration.getParams().get("action-type");
+        String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
         Action dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
 
         // STEP 2: Run the metadata workflow for the action.

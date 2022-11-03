@@ -49,7 +49,7 @@ public abstract class AbstractJob{
         return config;
     }
 
-    public abstract JobClient run();
+    public abstract JobClient submitJob();
 
     /**
      * Get head and tail stream cuts for a Pravega stream.

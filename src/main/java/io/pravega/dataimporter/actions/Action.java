@@ -45,7 +45,7 @@ public abstract class Action {
      * Submits Flink job to Flink cluster, and logs the {@link org.apache.flink.api.common.JobID} of the submitted job.
      */
     public void submitDataImportJob() {
-        JobClient jobClient = job.run();
+        JobClient jobClient = job.submitJob();
         log.info("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
     }
 

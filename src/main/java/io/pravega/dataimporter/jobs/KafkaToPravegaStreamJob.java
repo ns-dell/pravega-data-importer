@@ -48,7 +48,7 @@ public class KafkaToPravegaStreamJob extends AbstractJob {
         this.env = env;
     }
 
-    public JobClient run() {
+    public JobClient submitJob() {
         try {
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
             log.info("output stream: {}", outputStreamConfig);

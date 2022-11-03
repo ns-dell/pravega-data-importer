@@ -42,6 +42,8 @@ import static org.apache.flink.api.common.ExecutionConfig.PARALLELISM_UNKNOWN;
 public class AppConfiguration {
     final private static Logger log = LoggerFactory.getLogger(AppConfiguration.class);
 
+    public static final String ACTION_PARAMETER = "action-type";
+
     private final ParameterTool params;
     private final int parallelism;
     private final int readerParallelism;

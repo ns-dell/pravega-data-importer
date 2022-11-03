@@ -51,7 +51,9 @@ public class PravegaStreamMirroringJob extends AbstractJob {
         this.env = env;
     }
 
-    public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig, StreamCut startStreamCut, StreamCut endStreamCut){
+    public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig,
+                                                                      StreamCut startStreamCut,
+                                                                      StreamCut endStreamCut){
         return FlinkPravegaReader.<byte[]>builder()
                 .withPravegaConfig(inputStreamConfig.getPravegaConfig())
                 .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)
@@ -59,7 +61,9 @@ public class PravegaStreamMirroringJob extends AbstractJob {
                 .build();
     }
 
-    public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig, boolean isStreamOrdered, PravegaWriterMode pravegaWriterMode){
+    public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig,
+                                                               boolean isStreamOrdered,
+                                                               PravegaWriterMode pravegaWriterMode){
         FlinkPravegaWriter.Builder<byte[]> flinkPravegaWriterBuilder = FlinkPravegaWriter.<byte[]>builder()
                 .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                 .forStream(outputStreamConfig.getStream())
@@ -73,7 +77,7 @@ public class PravegaStreamMirroringJob extends AbstractJob {
         return flinkPravegaWriterBuilder.build();
     }
 
-    public JobClient run() {
+    public JobClient submitJob() {
         try {
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
 
@@ -84,13 +88,17 @@ public class PravegaStreamMirroringJob extends AbstractJob {
             final boolean isStreamOrdered = getConfig().getParams().getBoolean("isStreamOrdered", true);
             log.info("isStreamOrdered: {}", isStreamOrdered);
 
-            final FlinkPravegaReader<byte[]> flinkPravegaReader = createFlinkPravegaReader(inputStreamConfig, startStreamCut, endStreamCut);
+            final FlinkPravegaReader<byte[]> flinkPravegaReader = createFlinkPravegaReader(inputStreamConfig,
+                    startStreamCut,
+                    endStreamCut);
             final DataStream<byte[]> events = env
                     .addSource(flinkPravegaReader)
                     .uid("pravega-reader")
                     .name("Pravega reader from " + inputStreamConfig.getStream().getScopedName());
 
-            final FlinkPravegaWriter<byte[]> sink = createFlinkPravegaWriter(outputStreamConfig, isStreamOrdered, PravegaWriterMode.EXACTLY_ONCE);
+            final FlinkPravegaWriter<byte[]> sink = createFlinkPravegaWriter(outputStreamConfig,
+                    isStreamOrdered,
+                    PravegaWriterMode.EXACTLY_ONCE);
 
             events.addSink(sink)
                     .uid("pravega-writer")
