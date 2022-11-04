@@ -10,13 +10,17 @@
  */
 
 plugins {
+    id "java"
+    id "application"
+    id "maven-publish"
     id 'com.github.johnrengelman.shadow' version '4.0.3'
+    id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
 }
 
-apply plugin: "java"
-apply plugin: "application"
-apply plugin: "maven-publish"
-apply plugin: "com.github.johnrengelman.shadow"
+//apply plugin: "java"
+//apply plugin: "application"
+//apply plugin: "maven-publish"
+//apply plugin: "com.github.johnrengelman.shadow"
 apply from: "$rootDir/gradle/checkstyle.gradle"
 
 group = "io.pravega"
@@ -59,11 +63,19 @@ shadowJar {
     configurations = [project.configurations.flinkShadowJar]
 }
 
+lombok {
+    version = lombokVersion
+}
+
 dependencies {
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
+    compileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
+    testCompileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
+    annotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
+    testAnnotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
     implementation "org.apache.flink:flink-java:${flinkVersion}"
     implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
     implementation "org.apache.flink:flink-connector-kafka:${flinkVersion}"
@@ -79,9 +91,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
-    // https://mvnrepository.com/artifact/net.mguenther.kafka/kafka-junit
     testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
-    // https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter
     testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
 
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"

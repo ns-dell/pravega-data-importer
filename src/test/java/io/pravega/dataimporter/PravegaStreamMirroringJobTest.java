@@ -1,4 +1,4 @@
-package io.pravega.dataimporter.util;
+package io.pravega.dataimporter;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
@@ -9,7 +9,6 @@ import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaReader;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
-import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
 import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
 import org.apache.flink.core.execution.JobClient;

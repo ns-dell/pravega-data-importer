@@ -1,4 +1,4 @@
-package io.pravega.dataimporter.util;
+package io.pravega.dataimporter;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
