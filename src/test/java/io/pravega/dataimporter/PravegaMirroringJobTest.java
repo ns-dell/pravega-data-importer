@@ -10,7 +10,7 @@ import io.pravega.connectors.flink.FlinkPravegaReader;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.jobs.AbstractJob;
-import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
+import io.pravega.dataimporter.jobs.PravegaMirroringJob;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -25,9 +25,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class PravegaStreamMirroringJobTest {
+public class PravegaMirroringJobTest {
 
-    final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJobTest.class);
+    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJobTest.class);
 
     private static final int READER_TIMEOUT_MS = 2000;
 
@@ -40,7 +40,7 @@ public class PravegaStreamMirroringJobTest {
                             .build());
 
     @Test
-    public void TestPravegaStreamMirroringJob() throws Exception {
+    public void testPravegaStreamMirroringJob() throws Exception {
 
         //TODO: add code for flink job submission
         String argString = "--action-type stream-mirroring" +
@@ -64,8 +64,8 @@ public class PravegaStreamMirroringJobTest {
         final StreamCut startStreamCut = AbstractJob.resolveStartStreamCut(inputStreamConfig);
         final StreamCut endStreamCut = AbstractJob.resolveEndStreamCut(inputStreamConfig);
 
-        final FlinkPravegaReader<byte[]> source = PravegaStreamMirroringJob.createFlinkPravegaReader(inputStreamConfig,startStreamCut,endStreamCut);
-        final FlinkPravegaWriter<byte[]> sink = PravegaStreamMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
+        final FlinkPravegaReader<byte[]> source = PravegaMirroringJob.createFlinkPravegaReader(inputStreamConfig,startStreamCut,endStreamCut);
+        final FlinkPravegaWriter<byte[]> sink = PravegaMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
 
         StreamExecutionEnvironment testEnvironment = AbstractJob.initializeFlinkStreaming(appConfiguration, false);
 

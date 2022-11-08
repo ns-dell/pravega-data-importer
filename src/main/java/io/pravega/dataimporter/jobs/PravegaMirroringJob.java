@@ -33,20 +33,20 @@ import org.slf4j.LoggerFactory;
  * This supports events with any serialization.
  * When writing events, a fixed routing key is used.
  */
-public class PravegaStreamMirroringJob extends AbstractJob {
+public class PravegaMirroringJob extends AbstractJob {
 
-    final private static Logger log = LoggerFactory.getLogger(PravegaStreamMirroringJob.class);
+    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJob.class);
 
     final StreamExecutionEnvironment env;
 
-    final String jobName = getConfig().getJobName(PravegaStreamMirroringJob.class.getName());
+    final String jobName = getConfig().getJobName(PravegaMirroringJob.class.getName());
 
-    public PravegaStreamMirroringJob(AppConfiguration appConfiguration) {
+    public PravegaMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
         env = initializeFlinkStreaming(appConfiguration, true);
     }
 
-    public PravegaStreamMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
+    public PravegaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
         super(appConfiguration);
         this.env = env;
     }

@@ -16,11 +16,11 @@
 package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
-import io.pravega.dataimporter.jobs.KafkaToPravegaStreamJob;
+import io.pravega.dataimporter.jobs.KafkaMirroringJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KafkaMirroringAction extends Action{
+public class KafkaMirroringAction extends AbstractAction {
     final private static Logger log = LoggerFactory.getLogger(KafkaMirroringAction.class);
 
     public final static String NAME = "kafka-stream-mirroring";
@@ -29,7 +29,7 @@ public class KafkaMirroringAction extends Action{
 
     public KafkaMirroringAction(AppConfiguration config) {
         this.config = config;
-        super.job = new KafkaToPravegaStreamJob(this.config);
+        super.job = new KafkaMirroringJob(this.config);
     }
 
     public AppConfiguration getConfig() {
@@ -40,7 +40,7 @@ public class KafkaMirroringAction extends Action{
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
         log.info("output stream: {}", outputStreamConfig);
-        Action.createStream(outputStreamConfig, "kafka-mirror");
+        AbstractAction.createStream(outputStreamConfig, "kafka-mirror");
     }
 
     @Override

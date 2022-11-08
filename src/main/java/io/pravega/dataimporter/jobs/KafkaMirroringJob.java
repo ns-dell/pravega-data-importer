@@ -36,19 +36,19 @@ import java.util.Collections;
 /**
  * Continuously copy a Kafka stream to a Pravega stream.
  */
-public class KafkaToPravegaStreamJob extends AbstractJob {
-    final private static Logger log = LoggerFactory.getLogger(KafkaToPravegaStreamJob.class);
+public class KafkaMirroringJob extends AbstractJob {
+    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJob.class);
 
-    final String jobName = getConfig().getJobName(KafkaToPravegaStreamJob.class.getName());
+    private final String jobName = getConfig().getJobName(KafkaMirroringJob.class.getName());
 
-    final StreamExecutionEnvironment env;
+    private final StreamExecutionEnvironment env;
 
-    public KafkaToPravegaStreamJob(AppConfiguration appConfiguration) {
+    public KafkaMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
         env = initializeFlinkStreaming(appConfiguration, true);
     }
 
-    public KafkaToPravegaStreamJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
+    public KafkaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
         super(appConfiguration);
         this.env = env;
     }

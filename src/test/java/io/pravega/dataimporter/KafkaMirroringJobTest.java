@@ -24,9 +24,9 @@ import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultCluste
 import static net.mguenther.kafka.junit.ObserveKeyValues.on;
 import static net.mguenther.kafka.junit.SendValues.to;
 
-public class KafkaToPravegaStreamJobTest {
+public class KafkaMirroringJobTest {
 
-    final private static Logger log = LoggerFactory.getLogger(KafkaToPravegaStreamJobTest.class);
+    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJobTest.class);
 
     private EmbeddedKafkaCluster kafka;
 
@@ -48,7 +48,7 @@ public class KafkaToPravegaStreamJobTest {
     }
 
     @Test
-    public void TestKafkaToPravegaStreamJob() throws InterruptedException {
+    public void testKafkaToPravegaStreamJob() throws InterruptedException {
 
         HashMap<String, byte[]> headers = new HashMap<>();
         headers.put("h1", "v1".getBytes());

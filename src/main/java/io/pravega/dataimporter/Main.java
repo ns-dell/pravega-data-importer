@@ -15,13 +15,12 @@
  */
 package io.pravega.dataimporter;
 
-import io.pravega.dataimporter.actions.Action;
+import io.pravega.dataimporter.actions.AbstractAction;
 import io.pravega.dataimporter.actions.ActionFactory;
 
 import java.io.IOException;
 
 public class Main {
-
     public static void main(String[] args) {
         // When this method is executed, we should expect the following:
         // 1. Parameters specifying the job to be executed (e.g., mirroring, import)
@@ -36,7 +35,7 @@ public class Main {
 
         // STEP 1: Instantiate the Action based on input parameter
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        Action dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
+        AbstractAction dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
 
         // STEP 2: Run the metadata workflow for the action.
         dataImportAction.commitMetadataChanges();

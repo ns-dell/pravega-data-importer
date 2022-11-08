@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Interface that all Actions should implement (mirroring, importing, etc.).
  */
-public abstract class Action {
+public abstract class AbstractAction {
 
-    final private static Logger log = LoggerFactory.getLogger(Action.class);
+    final private static Logger log = LoggerFactory.getLogger(AbstractAction.class);
 
     protected AbstractJob job;
 

@@ -16,24 +16,24 @@
 package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
-import io.pravega.dataimporter.jobs.PravegaStreamMirroringJob;
+import io.pravega.dataimporter.jobs.PravegaMirroringJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implements the workflow related to mirroring one Pravega Stream from one cluster to another.
  */
-public class MirroringAction extends Action {
+public class PravegaMirroringAction extends AbstractAction {
 
-    final private static Logger log = LoggerFactory.getLogger(MirroringAction.class);
+    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringAction.class);
 
     public final static String NAME = "stream-mirroring";
 
     private final AppConfiguration config;
 
-    public MirroringAction(AppConfiguration config) {
+    public PravegaMirroringAction(AppConfiguration config) {
         this.config = config;
-        super.job = new PravegaStreamMirroringJob(this.config);
+        super.job = new PravegaMirroringJob(this.config);
     }
 
     public AppConfiguration getConfig() {
@@ -44,10 +44,10 @@ public class MirroringAction extends Action {
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
         log.info("input stream: {}", inputStreamConfig);
-        Action.createStream(inputStreamConfig, "mirror");
+        AbstractAction.createStream(inputStreamConfig, "mirror");
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
         log.info("output stream: {}", outputStreamConfig);
-        Action.createStream(outputStreamConfig, "mirror");
+        AbstractAction.createStream(outputStreamConfig, "mirror");
     }
 
     @Override

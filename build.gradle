@@ -14,14 +14,12 @@ plugins {
     id "application"
     id "maven-publish"
     id 'com.github.johnrengelman.shadow' version '4.0.3'
+    id "com.github.spotbugs" version "${spotbugsVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
 }
 
-//apply plugin: "java"
-//apply plugin: "application"
-//apply plugin: "maven-publish"
-//apply plugin: "com.github.johnrengelman.shadow"
 apply from: "$rootDir/gradle/checkstyle.gradle"
+apply from: "$rootDir/gradle/spotbugs.gradle"
 
 group = "io.pravega"
 description = "Pravega Flink Tools"
@@ -72,6 +70,8 @@ dependencies {
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
     compileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
     testCompileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
     annotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
@@ -91,6 +91,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
+    implementation 'info.picocli:picocli:4.7.0'
     testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
     testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
 

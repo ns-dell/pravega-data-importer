@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter.actions;
 
-import io.pravega.dataimporter.AppConfiguration;
 
-public class ActionFactory {
-
-    public AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
-        switch (actionType) {
-
-            case PravegaMirroringAction.NAME:
-                return new PravegaMirroringAction(configuration);
-            case KafkaMirroringAction.NAME:
-                return new KafkaMirroringAction(configuration);
-            default:
-                throw new IllegalArgumentException("Unknown action type.");
+plugins.withId('com.github.spotbugs') {
+    spotbugs {
+        toolVersion = spotbugsVersion
+        effort = "max"
+        includeFilter = file("$rootDir/checkstyle/spotbugs-include.xml")
+        excludeFilter = file("$rootDir/checkstyle/spotbugs-exclude.xml")
+        ignoreFailures = true
+    }
+    spotbugsMain {
+        reports {
+            xml.enabled = false
+            html.enabled = true
         }
     }
 }
