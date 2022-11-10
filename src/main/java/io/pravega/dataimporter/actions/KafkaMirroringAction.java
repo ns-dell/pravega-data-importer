@@ -20,6 +20,10 @@ import io.pravega.dataimporter.jobs.KafkaMirroringJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class that represents the workflow for a Kafka Mirroring Action.
+ * The action will create or connect to an existing stream on the output cluster.
+ */
 public class KafkaMirroringAction extends AbstractAction {
     final private static Logger log = LoggerFactory.getLogger(KafkaMirroringAction.class);
 
@@ -32,10 +36,16 @@ public class KafkaMirroringAction extends AbstractAction {
         super.job = new KafkaMirroringJob(this.config);
     }
 
+    /**
+     * Returns the application configuration passed in during action creation.
+     */
     public AppConfiguration getConfig() {
         return config;
     }
 
+    /**
+     * Creates the output Pravega stream for the data importer to write to.
+     */
     @Override
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
@@ -43,6 +53,9 @@ public class KafkaMirroringAction extends AbstractAction {
         AbstractAction.createStream(outputStreamConfig, "kafka-mirror");
     }
 
+    /**
+     * Retrieves name of associated Flink job.
+     */
     @Override
     public String getJobName() {
         return job.getClass().getName();

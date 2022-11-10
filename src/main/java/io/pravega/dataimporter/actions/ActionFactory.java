@@ -17,8 +17,14 @@ package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
 
+/**
+ * Factory class that is used to instantiate concrete implementations of AbstractAction.
+ */
 public class ActionFactory {
 
+    /**
+     * Method that instantiates concrete implementations of AbstractAction from an input String and AppConfiguration.
+     */
     public AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
         switch (actionType) {
 

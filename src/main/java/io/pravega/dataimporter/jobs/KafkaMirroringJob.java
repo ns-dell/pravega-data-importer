@@ -53,6 +53,9 @@ public class KafkaMirroringJob extends AbstractJob {
         this.env = env;
     }
 
+    /**
+     * Creates Kafka source and Pravega sink and submits to Flink cluster.
+     */
     public JobClient submitJob() {
         try {
             final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");

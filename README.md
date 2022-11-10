@@ -51,29 +51,38 @@ It automatically recovers from failures and resumes where it left off.
 It can use parallelism for high-volume streams with multiple segments.
 It marks the associated input and output Pravega streams with stream tag `"mirror"`.
 
-### Run Locally with Flink CLI
+### Run Locally
 
 First build project:
 ```shell
-./gradlew clean build -x test
+./gradlew clean build installDist -x test
 ```
 Make sure you have a Flink cluster running locally.
 In the input and output Pravega clusters, make sure the associated stream scopes have already been created.
 The `help` command in the Pravega CLI shows how this can be done.
-Run using Flink CLI from `pravega-data-importer` directory.
-This example takes a Pravega stream running at `localhost:9090` with stream `examples/network` as input, and outputs to
-Pravega stream `examples2/network-cloud` running at `localhost:9990`.
+Please navigate to this directory once gradle build is complete:
 ```shell
-flink run build/libs/pravega-data-importer-1.0-SNAPSHOT.jar \
+cd pravega-data-importer/build/install/pravega-data-importer/bin
+```
+Running this help command in above directory shows the parameters needed to run the script:
+```shell
+pravega-data-importer --help
+```
+This example takes a Pravega stream running at `localhost:9090` with stream `source/sourceStream` as input, and outputs to
+Pravega stream `destination/destinationStream` running at `localhost:9990`.
+```shell
+pravega-data-importer \
   --action-type stream-mirroring \
   --input-controller tcp://localhost:9090 \
-  --input-stream examples/network \
+  --input-stream source/sourceStream \
   --input-startAtTail false \
-  --output-stream examples2/network-cloud \
-  --output-controller tcp://127.0.0.1:9990
+  --output-stream destination/destinationStream \
+  --output-controller tcp://127.0.0.1:9990 \
+  --flinkHost localhost \
+  --flinkPort 8081
 ```
 
-## Kafka-Stream-Mirroring: Continuously copying a Pravega stream to another Pravega stream
+## Kafka-Stream-Mirroring: Continuously copying a Kafka stream to another Pravega stream
 
 ### Overview
 
@@ -83,24 +92,31 @@ are never missed nor duplicated.
 It can use parallelism for high-volume streams with multiple segments.
 It marks the associated output Pravega stream with stream tag `"kafka-mirror"`.
 
-### Run Locally with Flink CLI
+### Run Locally
 
 First build project:
 ```shell
-./gradlew clean build -x test
+./gradlew clean build installDist -x test
 ```
 Make sure you have a Flink cluster running locally.
 In the output Pravega cluster, make sure the associated stream scope has already been created.
 The `help` command in the Pravega CLI shows how this can be done.
-Run using Flink CLI from `pravega-data-importer` directory.
-This example takes a Kafka stream running at `localhost:9092` with topic `test-input` and outputs to
-Pravega stream `examples/from-kafka` running at `localhost:9090`.
+Please navigate to this directory once gradle build is complete:
 ```shell
-flink run build/libs/pravega-data-importer-1.0-SNAPSHOT.jar \
+cd pravega-data-importer/build/install/pravega-data-importer/bin
+```
+Running this help command in above directory shows the parameters needed to run the script:
+```shell
+pravega-data-importer --help
+```
+This example takes a Kafka stream running at `localhost:9092` with topic `test-input` and outputs to
+Pravega stream `destination/from-kafka` running at `localhost:9090`.
+```shell
+pravega-data-importer \
   --action-type kafka-stream-mirroring \
   --input-topic test-input \
   --bootstrap.servers localhost:9092 \
-  --output-stream examples/from-kafka \
+  --output-stream destination/from-kafka \
   --output-controller tcp://127.0.0.1:9090 \
   --isStreamOrdered true
 ```

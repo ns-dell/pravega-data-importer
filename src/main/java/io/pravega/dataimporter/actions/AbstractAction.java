@@ -39,6 +39,9 @@ public abstract class AbstractAction {
      */
     public abstract void commitMetadataChanges();
 
+    /**
+     * Returns the name of the job.
+     */
     public abstract String getJobName();
 
     /**

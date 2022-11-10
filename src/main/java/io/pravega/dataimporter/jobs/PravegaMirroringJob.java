@@ -51,6 +51,9 @@ public class PravegaMirroringJob extends AbstractJob {
         this.env = env;
     }
 
+    /**
+     * Static factory for creating a FlinkPravegaReader. This is used in the Flink job as well as testing.
+     */
     public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig,
                                                                       StreamCut startStreamCut,
                                                                       StreamCut endStreamCut){
@@ -61,6 +64,9 @@ public class PravegaMirroringJob extends AbstractJob {
                 .build();
     }
 
+    /**
+     * Static factory for creating a FlinkPravegaWriter. This is used in the Flink job as well as testing.
+     */
     public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig,
                                                                boolean isStreamOrdered,
                                                                PravegaWriterMode pravegaWriterMode){
@@ -77,6 +83,9 @@ public class PravegaMirroringJob extends AbstractJob {
         return flinkPravegaWriterBuilder.build();
     }
 
+    /**
+     * Creates Pravega source and Pravega sink and submits to Flink cluster.
+     */
     public JobClient submitJob() {
         try {
             final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");

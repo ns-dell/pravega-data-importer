@@ -45,10 +45,16 @@ public abstract class AbstractJob{
         this.config = config;
     }
 
+    /**
+     * Used to retrieve the application configuration, containing parameters.
+     */
     public AppConfiguration getConfig() {
         return config;
     }
 
+    /**
+     * Concrete implementations use this method to submit Flink jobs to the Flink cluster.
+     */
     public abstract JobClient submitJob();
 
     /**
@@ -87,6 +93,12 @@ public abstract class AbstractJob{
         }
     }
 
+    /**
+     * Initializes and returns a StreamExecutionEnvironment for Flink jobs to run.
+     * Takes in the application configuration and boolean for if the Flink Cluster is a remote cluster, in which case
+     * the method will return a RemoteEnvironment. Else, a LocalStreamEnvironment may be returned (this is for use in
+     * unit testing and integration testing purposes).
+     */
     public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config, boolean remoteCluster) {
         StreamExecutionEnvironment env;
         String host = config.getParams().get("flinkHost", "localhost");
@@ -135,6 +147,9 @@ public abstract class AbstractJob{
         return env;
     }
 
+    /**
+     * Initializes Flink ExecutionEnvironment in batched processing mode.
+     */
     public ExecutionEnvironment initializeFlinkBatch() {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
