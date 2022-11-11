@@ -18,6 +18,10 @@ package io.pravega.dataimporter.utils;
 import java.io.Serializable;
 import java.util.HashMap;
 
+/**
+ * A class containing data extracted from Apache Kafka's {@link org.apache.kafka.clients.consumer.ConsumerRecord}
+ * that can be useful when forwarding to a Pravega stream.
+ */
 public class PravegaRecord implements Serializable {
 
     private final byte[] key;
@@ -27,7 +31,11 @@ public class PravegaRecord implements Serializable {
     private final String topic;
     private final long timestamp;
 
-    public PravegaRecord(byte[] key, byte[] value, HashMap<String, byte[]> headers, int partition, String topic, long timestamp) {
+    /**
+     * Creates a new instance of the PravegaRecord class.
+     */
+    public PravegaRecord(byte[] key, byte[] value, HashMap<String, byte[]> headers, int partition, String topic,
+                         long timestamp) {
         this.key = key;
         this.value = value;
         this.partition = partition;

@@ -41,11 +41,22 @@ public class PravegaMirroringJob extends AbstractJob {
 
     final String jobName = getConfig().getJobName(PravegaMirroringJob.class.getName());
 
+    /**
+     * Creates a new instance of the PravegaMirroringJob class.
+     *
+     * @param appConfiguration The application parameters needed for configuration of a PravegaMirroringJob.
+     */
     public PravegaMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
         env = initializeFlinkStreaming(appConfiguration, true);
     }
 
+    /**
+     * Creates a new instance of the PravegaMirroringJob class.
+     *
+     * @param appConfiguration The application parameters needed for configuration of a PravegaMirroringJob.
+     * @param env Users may supply their own Flink {@link StreamExecutionEnvironment}.
+     */
     public PravegaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
         super(appConfiguration);
         this.env = env;
@@ -53,6 +64,10 @@ public class PravegaMirroringJob extends AbstractJob {
 
     /**
      * Static factory for creating a FlinkPravegaReader. This is used in the Flink job as well as testing.
+     *
+     * @param inputStreamConfig Input Stream configuration needed for {@link FlinkPravegaReader}
+     * @param startStreamCut Starting stream cut
+     * @param endStreamCut Ending stream cut
      */
     public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig,
                                                                       StreamCut startStreamCut,
@@ -66,6 +81,11 @@ public class PravegaMirroringJob extends AbstractJob {
 
     /**
      * Static factory for creating a FlinkPravegaWriter. This is used in the Flink job as well as testing.
+     *
+     * @param outputStreamConfig Output Stream configuration needed for {@link FlinkPravegaWriter}
+     * @param isStreamOrdered boolean used to determine if writes in input stream are ordered. If true, routing key is
+     *                        taken from current thread name. Else, it is an unordered write.
+     * @param pravegaWriterMode The writer mode of BEST_EFFORT, ATLEAST_ONCE, or EXACTLY_ONCE.
      */
     public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig,
                                                                boolean isStreamOrdered,

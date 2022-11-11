@@ -21,6 +21,9 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 
 import java.io.IOException;
 
+/**
+ * Implementation of Flink's DeserializationSchema that is used to deserialize byte arrays.
+ */
 public class ByteArrayDeserializationFormat implements DeserializationSchema<byte[]> {
     @Override
     public byte[] deserialize(byte[] message) throws IOException {

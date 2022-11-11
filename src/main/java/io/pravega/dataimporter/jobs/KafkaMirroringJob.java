@@ -43,11 +43,22 @@ public class KafkaMirroringJob extends AbstractJob {
 
     private final StreamExecutionEnvironment env;
 
+    /**
+     * Creates a new instance of the KafkaMirroringJob class.
+     *
+     * @param appConfiguration The application parameters needed for configuration of a KafkaMirroringJob.
+     */
     public KafkaMirroringJob(AppConfiguration appConfiguration) {
         super(appConfiguration);
         env = initializeFlinkStreaming(appConfiguration, true);
     }
 
+    /**
+     * Creates a new instance of the KafkaMirroringJob class.
+     *
+     * @param appConfiguration The application parameters needed for configuration of a KafkaMirroringJob.
+     * @param env Users may supply their own Flink {@link StreamExecutionEnvironment}.
+     */
     public KafkaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
         super(appConfiguration);
         this.env = env;

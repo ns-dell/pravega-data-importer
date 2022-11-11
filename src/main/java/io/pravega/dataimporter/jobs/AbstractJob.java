@@ -98,6 +98,11 @@ public abstract class AbstractJob{
      * Takes in the application configuration and boolean for if the Flink Cluster is a remote cluster, in which case
      * the method will return a RemoteEnvironment. Else, a LocalStreamEnvironment may be returned (this is for use in
      * unit testing and integration testing purposes).
+     *
+     * @param config Application parameters used to configure the Flink {@link StreamExecutionEnvironment}.
+     * @param remoteCluster If true, returned environment will specifically be a
+     * {@link org.apache.flink.streaming.api.environment.RemoteStreamEnvironment}. Else, an environment will be created
+     *                      based on context in which program is currently executed.
      */
     public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config, boolean remoteCluster) {
         StreamExecutionEnvironment env;

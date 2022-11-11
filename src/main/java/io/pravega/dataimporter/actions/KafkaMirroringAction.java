@@ -31,6 +31,9 @@ public class KafkaMirroringAction extends AbstractAction {
 
     private final AppConfiguration config;
 
+    /**
+     * Creates a new instance of the KafkaMirroringAction class.
+     */
     public KafkaMirroringAction(AppConfiguration config) {
         this.config = config;
         super.job = new KafkaMirroringJob(this.config);

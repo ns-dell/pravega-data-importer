@@ -17,6 +17,9 @@ package io.pravega.dataimporter.utils;
 
 import org.apache.flink.api.common.serialization.SerializationSchema;
 
+/**
+ * Implementation of Flink's SerializationSchema that is used to serialize byte arrays.
+ */
 public class ByteArraySerializationFormat implements SerializationSchema<byte[]> {
     @Override
     public byte[] serialize(byte[] element) {

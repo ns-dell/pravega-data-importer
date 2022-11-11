@@ -31,6 +31,9 @@ public class PravegaMirroringAction extends AbstractAction {
 
     private final AppConfiguration config;
 
+    /**
+     * Creates a new instance of the PravegaMirroringAction class.
+     */
     public PravegaMirroringAction(AppConfiguration config) {
         this.config = config;
         super.job = new PravegaMirroringJob(this.config);

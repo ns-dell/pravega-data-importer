@@ -56,6 +56,9 @@ public class AppConfiguration {
     private final String jobName;
     private final String avroSchema;
 
+    /**
+     * Creates a new instance of the AppConfiguration class.
+     */
     public AppConfiguration(String[] args) throws IOException {
         params = ParameterTool.fromArgs(args);
         log.info("Parameter Tool: {}", getParams().toMap());
@@ -84,6 +87,9 @@ public class AppConfiguration {
     }
 
     @Override
+    /**
+     * Returns String representation of AppConfiguration
+     */
     public String toString() {
         return "AppConfiguration{" +
                 "parallelism=" + parallelism +
@@ -99,54 +105,95 @@ public class AppConfiguration {
                 '}';
     }
 
+    /**
+     * Returns application parameters
+     */
     public ParameterTool getParams() {
         return params;
     }
 
+    /**
+     * Returns stream configuration
+     *
+     * @param argName Info about the stream such as "input" or "output"
+     */
     public StreamConfig getStreamConfig(final String argName) {
         return new StreamConfig(argName,  getParams());
     }
 
+    /**
+     * Returns parallelism for the app configuration.
+     */
     public int getParallelism() {
         return parallelism;
     }
 
+    /**
+     * Returns reader parallelism for the app configuration.
+     */
     public int getReaderParallelism() {
         return readerParallelism;
     }
 
+    /**
+     * Returns checkpoint timeout in milliseconds for the app configuration.
+     */
     public long getCheckpointTimeoutMs() {
         return checkpointTimeoutMs;
     }
 
+    /**
+     * Returns checkpoint interval in milliseconds for the app configuration.
+     */
     public long getCheckpointIntervalMs() {
         return checkpointIntervalMs;
     }
 
+    /**
+     * Returns if checkpointing is enabled for the app configuration.
+     */
     public boolean isEnableCheckpoint() {
         return enableCheckpoint;
     }
 
+    /**
+     * Returns if operator chaining is enabled for the app configuration.
+     */
     public boolean isEnableOperatorChaining() {
         return enableOperatorChaining;
     }
 
+    /**
+     * Returns rebalancing is enabled for the app configuration.
+     */
     public boolean isEnableRebalance() {
         return enableRebalance;
     }
 
+    /**
+     * Returns maximum out of orderness in milliseconds for the app configuration.
+     */
     public long getMaxOutOfOrdernessMs() {
         return maxOutOfOrdernessMs;
     }
 
+    /**
+     * Returns job name for the app configuration.
+     */
     public String getJobName(String defaultJobName) {
         return (jobName == null) ? defaultJobName : jobName;
     }
 
+    /**
+     * Returns Avro schema for the app configuration.
+     */
     public String getAvroSchema() {
         return avroSchema;
     }
 
+    /**
+     * Inner class that represents the configuration for a Pravega Stream.
+     */
     public static class StreamConfig {
         private final Stream stream;
         private final PravegaConfig pravegaConfig;
@@ -158,6 +205,9 @@ public class AppConfiguration {
         private final boolean startAtTail;
         private final boolean endAtTail;
 
+        /**
+         * Creates a new instance of the StreamConfig class.
+         */
         public StreamConfig(final String argName, final ParameterTool globalParams) {
             final String argPrefix = argName.isEmpty() ? argName : argName + "-";
 
@@ -204,6 +254,9 @@ public class AppConfiguration {
         }
 
         @Override
+        /**
+         * Returns StreamConfig in String format.
+         */
         public String toString() {
             return "StreamConfig{" +
                     "stream=" + stream +
@@ -218,30 +271,51 @@ public class AppConfiguration {
                     '}';
         }
 
+        /**
+         * Returns Pravega Stream for the StreamConfig.
+         */
         public Stream getStream() {
             return stream;
         }
 
+        /**
+         * Returns PravegaConfig for the StreamConfig.
+         */
         public PravegaConfig getPravegaConfig() {
             return pravegaConfig;
         }
 
+        /**
+         * Returns Scaling Policy for the StreamConfig.
+         */
         public ScalingPolicy getScalingPolicy() {
             return ScalingPolicy.byDataRate(targetRate, scaleFactor, minNumSegments);
         }
 
+        /**
+         * Returns Starting StreamCut for the given StreamConfig.
+         */
         public StreamCut getStartStreamCut() {
             return startStreamCut;
         }
 
+        /**
+         * Returns ending StreamCut for the given StreamConfig.
+         */
         public StreamCut getEndStreamCut() {
             return endStreamCut;
         }
 
+        /**
+         * Returns if the start is at the tail of the Pravega Stream for the given StreamConfig.
+         */
         public boolean isStartAtTail() {
             return startAtTail;
         }
 
+        /**
+         * Returns if the end is at the tail of the Pravega Stream for the given StreamConfig.
+         */
         public boolean isEndAtTail() {
             return endAtTail;
         }
