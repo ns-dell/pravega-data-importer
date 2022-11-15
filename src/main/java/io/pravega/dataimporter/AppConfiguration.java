@@ -59,8 +59,8 @@ public class AppConfiguration {
     /**
      * Creates a new instance of the AppConfiguration class.
      */
-    public AppConfiguration(String[] args) throws IOException {
-        params = ParameterTool.fromArgs(args);
+    public AppConfiguration(Map<String, String> args) throws IOException {
+        params = ParameterTool.fromMap(args);
         log.info("Parameter Tool: {}", getParams().toMap());
         parallelism = getParams().getInt("parallelism", PARALLELISM_UNKNOWN);
         readerParallelism = getParams().getInt("readerParallelism", PARALLELISM_DEFAULT);

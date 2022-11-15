@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class PravegaMirroringJobTest {
@@ -42,16 +43,15 @@ public class PravegaMirroringJobTest {
     @Test
     public void testPravegaStreamMirroringJob() throws Exception {
 
-        //TODO: add code for flink job submission
-        String argString = "--action-type stream-mirroring" +
-                " --input-controller tcp://localhost:9090" +
-                " --input-stream localScope/localStream" +
-                " --input-startAtTail false" +
-                " --output-stream remoteScope/remoteStream" +
-                " --output-controller tcp://127.0.0.1:9990";
-        String[] args = argString.split("\\s+");
+        HashMap<String, String> argsMap = new HashMap<>();
+        argsMap.put("action-type", "stream-mirroring");
+        argsMap.put("input-stream", "localScope/localStream");
+        argsMap.put("input-controller", "tcp://localhost:9090");
+        argsMap.put("input-startAtTail", String.valueOf(false));
+        argsMap.put("output-stream", "remoteScope/remoteStream");
+        argsMap.put("output-controller", "tcp://127.0.0.1:9990");
 
-        AppConfiguration appConfiguration = new AppConfiguration(args);
+        AppConfiguration appConfiguration = new AppConfiguration(argsMap);
 
         PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345, "localScope", "localStream");
         localTestResource.start();

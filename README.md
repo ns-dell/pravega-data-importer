@@ -64,22 +64,23 @@ Please navigate to this directory once gradle build is complete:
 ```shell
 cd pravega-data-importer/build/install/pravega-data-importer/bin
 ```
-Running this help command in above directory shows the parameters needed to run the script:
+Running the following help commands in above directory show the parameters needed to run the script:
 ```shell
 pravega-data-importer --help
+pravega-data-importer stream-mirroring --help
 ```
 This example takes a Pravega stream running at `localhost:9090` with stream `source/sourceStream` as input, and outputs to
 Pravega stream `destination/destinationStream` running at `localhost:9990`.
 ```shell
-pravega-data-importer \
-  --action-type stream-mirroring \
-  --input-controller tcp://localhost:9090 \
-  --input-stream source/sourceStream \
-  --input-startAtTail false \
-  --output-stream destination/destinationStream \
-  --output-controller tcp://127.0.0.1:9990 \
-  --flinkHost localhost \
-  --flinkPort 8081
+pravega-data-importer
+  stream-mirroring
+  input-controller=tcp://localhost:9090
+  input-stream=source/sourceStream
+  input-startAtTail=false
+  output-stream=destination/destinationStream
+  output-controller=tcp://127.0.0.1:9990
+  flinkHost=localhost
+  flinkPort=8081
 ```
 
 ## Kafka-Stream-Mirroring: Continuously copying a Kafka stream to another Pravega stream
@@ -105,18 +106,19 @@ Please navigate to this directory once gradle build is complete:
 ```shell
 cd pravega-data-importer/build/install/pravega-data-importer/bin
 ```
-Running this help command in above directory shows the parameters needed to run the script:
+Running the following help commands in above directory show the parameters needed to run the script:
 ```shell
 pravega-data-importer --help
+pravega-data-importer kafka-stream-mirroring --help
 ```
 This example takes a Kafka stream running at `localhost:9092` with topic `test-input` and outputs to
 Pravega stream `destination/from-kafka` running at `localhost:9090`.
 ```shell
-pravega-data-importer \
-  --action-type kafka-stream-mirroring \
-  --input-topic test-input \
-  --bootstrap.servers localhost:9092 \
-  --output-stream destination/from-kafka \
-  --output-controller tcp://127.0.0.1:9090 \
-  --isStreamOrdered true
+pravega-data-importer
+  kafka-stream-mirroring
+  input-topic=test-input
+  bootstrap-servers=localhost:9092
+  output-stream=destination/from-kafka
+  output-controller=tcp://127.0.0.1:9090
+  isStreamOrdered=true
 ```
