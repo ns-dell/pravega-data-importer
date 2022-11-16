@@ -57,9 +57,18 @@ First build project:
 ```shell
 ./gradlew clean build installDist -x test
 ```
-Make sure you have a Flink cluster running locally.
-In the input and output Pravega clusters, make sure the associated stream scopes have already been created.
-The `help` command in the Pravega CLI shows how this can be done.
+Make sure you have a Flink cluster running locally. In the Flink installation directory, you can run the following
+command to start a Flink cluster locally:
+```shell
+bin/start-cluster.sh
+```
+In the input and output Pravega clusters, make sure the associated stream scope has already been created:
+In the Pravega CLI on both source and destination clusters:
+```shell
+scope create <scope-name>
+```
+The `help` command in the Pravega CLI gives more information on how to use the Pravega CLI.
+
 Please navigate to this directory once gradle build is complete:
 ```shell
 cd pravega-data-importer/build/install/pravega-data-importer/bin
@@ -83,6 +92,19 @@ pravega-data-importer
   flinkPort=8081
 ```
 
+To test if the job is working, start up an instance of `pravega-cli` and connect to the destination cluster.
+The destination scope and stream should be visible using `scope list` command and `stream list <scope-name>`.
+
+To see the data importer in action, you can use the `consoleWriter` functionality provided in 
+[pravega-samples](https://github.com/pravega/pravega-samples) after your Flink job has been submitted. 
+After building the project, navigate and run:
+```shell
+cd pravega-samples/pravega-client-examples/build/install/pravega-client-examples
+bin/consoleWriter -scope <source> -name <sourceStream>
+```
+After entering submitting some input to the `consoleWriter`,
+the same output should appear in the destination stream, showing that the job is working.
+
 ## Kafka-Stream-Mirroring: Continuously copying a Kafka stream to another Pravega stream
 
 ### Overview
@@ -99,9 +121,17 @@ First build project:
 ```shell
 ./gradlew clean build installDist -x test
 ```
-Make sure you have a Flink cluster running locally.
-In the output Pravega cluster, make sure the associated stream scope has already been created.
-The `help` command in the Pravega CLI shows how this can be done.
+Make sure you have a Flink cluster running locally. In the Flink installation directory, you can run the following
+command to start a Flink cluster locally:
+```shell
+bin/start-cluster.sh
+```
+In the output Pravega cluster, make sure the associated stream scope has already been created:
+In the Pravega CLI:
+```shell
+scope create <destination-scope>
+```
+The `help` command in the Pravega CLI gives more information on how to use the Pravega CLI.
 Please navigate to this directory once gradle build is complete:
 ```shell
 cd pravega-data-importer/build/install/pravega-data-importer/bin
@@ -122,3 +152,24 @@ pravega-data-importer
   output-controller=tcp://127.0.0.1:9090
   isStreamOrdered=true
 ```
+To test if the job is working, start up an instance of `pravega-cli` and connect to the destination cluster.
+The destination scope and stream should be visible using `scope list` command and `stream list <scope-name>`.
+
+To write to a local Kafka cluster, please install [Kafka](https://kafka.apache.org) and follow the
+instructions listed on the [Quickstart](https://kafka.apache.org/quickstart) page.
+
+Once you have Kafka running, running this command will create a `"test-input"` topic with Kafka running at
+`localhost:9092`:
+```shell
+bin/kafka-topics.sh --create --topic test-input --bootstrap-server localhost:9092
+```
+The data importer can extract lots of different information from a Kafka message, including 
+key, value, headers, partition number, topic, timestamp, and timestamp type.
+
+With the following command, key/value pairs can be written:
+```shell
+bin/kafka-console-producer.sh --topic test-input --bootstrap-server localhost:9092 \
+--property parse.key=true --property key.separator=":"
+```
+On the destination Pravega side, the destination stream should show `PravegaRecord` Java objects with the input,
+as well as the other information extracted from Kafka messages mentioned above.
