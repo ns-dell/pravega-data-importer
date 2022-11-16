@@ -17,6 +17,9 @@ package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
 
+import java.io.IOException;
+import java.util.Map;
+
 /**
  * Factory class that is used to instantiate concrete implementations of AbstractAction.
  */
@@ -25,7 +28,7 @@ public class ActionFactory {
     /**
      * Method that instantiates concrete implementations of AbstractAction from an input String and AppConfiguration.
      */
-    public AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
+    private AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
         switch (actionType) {
 
             case PravegaMirroringAction.NAME:
@@ -35,5 +38,25 @@ public class ActionFactory {
             default:
                 throw new IllegalArgumentException("Unknown action type.");
         }
+    }
+
+    public static int createActionSubmitJob(Map<String, String> argsMap){
+        AppConfiguration configuration;
+        try {
+            configuration = new AppConfiguration(argsMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // STEP 1: Instantiate the Action based on input parameter
+        String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
+        AbstractAction dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
+
+        // STEP 2: Run the metadata workflow for the action.
+        dataImportAction.commitMetadataChanges();
+
+        // STEP 3: Submit the associated job to Flink.
+        dataImportAction.submitDataImportJob();
+        return 0;
     }
 }

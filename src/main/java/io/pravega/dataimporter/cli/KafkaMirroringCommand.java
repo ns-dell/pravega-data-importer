@@ -67,23 +67,6 @@ public class KafkaMirroringCommand implements Callable<Integer> {
         argsMap.put("flinkHost", flinkHost);
         argsMap.put("flinkPort", String.valueOf(flinkPort));
 
-
-        AppConfiguration configuration;
-        try {
-            configuration = new AppConfiguration(argsMap);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // STEP 1: Instantiate the Action based on input parameter
-        String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
-
-        // STEP 2: Run the metadata workflow for the action.
-        dataImportAction.commitMetadataChanges();
-
-        // STEP 3: Submit the associated job to Flink.
-        dataImportAction.submitDataImportJob();
-        return 0;
+        return ActionFactory.createActionSubmitJob(argsMap);
     }
 }
