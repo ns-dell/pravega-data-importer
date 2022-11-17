@@ -64,6 +64,35 @@ public class KafkaMirroringJob extends AbstractJob {
         this.env = env;
     }
 
+    public static KafkaSource<PravegaRecord> createKafkaSourceForPravegaRecord(
+            String bootstrap_servers,
+            String kafkaTopic){
+        return KafkaSource.<PravegaRecord>builder()
+                .setBootstrapServers(bootstrap_servers)
+                .setTopics(Collections.singletonList(kafkaTopic))
+                .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
+                .build();
+    }
+
+    public static FlinkPravegaWriter<PravegaRecord> createFlinkPravegaWriterForPravegaRecord(
+            AppConfiguration.StreamConfig outputStreamConfig,
+            boolean isStreamOrdered,
+            PravegaWriterMode pravegaWriterMode){
+        FlinkPravegaWriter.Builder<PravegaRecord> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord>builder()
+                .withPravegaConfig(outputStreamConfig.getPravegaConfig())
+                .forStream(outputStreamConfig.getStream())
+                .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));
+        if (isStreamOrdered){
+            // ordered write, multi-partition.
+            // routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
+            flinkPravegaWriterBuilder.withEventRouter(event ->
+                    (event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition())));
+        }
+        flinkPravegaWriterBuilder.withWriterMode(pravegaWriterMode);
+
+        return flinkPravegaWriterBuilder.build();
+    }
+
     /**
      * Creates Kafka source and Pravega sink and submits to Flink cluster.
      */
@@ -75,13 +104,11 @@ public class KafkaMirroringJob extends AbstractJob {
             final boolean isStreamOrdered = getConfig().getParams().getBoolean("isStreamOrdered", true);
             log.info("isStreamOrdered: {}", isStreamOrdered);
 
-            String bootstrap_servers = getConfig().getParams().get("bootstrap.servers","localhost:9092");
-            String kafkaTopic = getConfig().getParams().get("input-topic");
-            final KafkaSource<PravegaRecord> kafkaSource = KafkaSource.<PravegaRecord>builder()
-                    .setBootstrapServers(bootstrap_servers)
-                    .setTopics(Collections.singletonList(kafkaTopic))
-                    .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
-                    .build();
+            final String bootstrap_servers = getConfig().getParams().get(
+                    "bootstrap.servers","localhost:9092");
+            final String kafkaTopic = getConfig().getParams().get("input-topic");
+            final KafkaSource<PravegaRecord> kafkaSource =
+                    createKafkaSourceForPravegaRecord(bootstrap_servers, kafkaTopic);
 
             final DataStream<PravegaRecord> toOutput =
                     env.fromSource(
@@ -89,18 +116,9 @@ public class KafkaMirroringJob extends AbstractJob {
                             WatermarkStrategy.noWatermarks(),
                             "Kafka consumer from " + getConfig().getParams().get("input-topic"));
 
-            final FlinkPravegaWriter<PravegaRecord> sink;
-            FlinkPravegaWriter.Builder<PravegaRecord> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord>builder()
-                    .withPravegaConfig(outputStreamConfig.getPravegaConfig())
-                    .forStream(outputStreamConfig.getStream())
-                    .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));
-            if (isStreamOrdered){
-                //ordered write, multi-partition. routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
-                flinkPravegaWriterBuilder.withEventRouter(event -> (event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition())));
-            }
-            flinkPravegaWriterBuilder.withWriterMode(PravegaWriterMode.EXACTLY_ONCE);
+            final FlinkPravegaWriter<PravegaRecord> sink = createFlinkPravegaWriterForPravegaRecord(
+                    outputStreamConfig, isStreamOrdered, PravegaWriterMode.EXACTLY_ONCE);
 
-            sink = flinkPravegaWriterBuilder.build();
             toOutput
                     .addSink(sink)
                     .uid("pravega-writer")

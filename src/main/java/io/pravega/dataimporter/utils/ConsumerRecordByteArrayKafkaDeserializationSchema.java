@@ -24,8 +24,8 @@ import org.apache.kafka.common.header.Header;
 import java.util.HashMap;
 
 /**
- * DeserializationSchema that is used to deserialize Kafka's {@link ConsumerRecord} and convert to Data Importer's
- * {@link PravegaRecord}.
+ * An implementation of {@link KafkaRecordDeserializationSchema} that is used to deserialize Kafka's
+ * {@link ConsumerRecord} and convert to Data Importer's {@link PravegaRecord}.
  */
 public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaRecordDeserializationSchema<PravegaRecord> {
 
