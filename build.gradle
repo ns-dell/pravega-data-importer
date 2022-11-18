@@ -20,6 +20,10 @@ plugins {
     id "jacoco"
 }
 
+tasks.withType(JavaCompile) {
+    options.release = 11
+}
+
 apply from: "$rootDir/gradle/checkstyle.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 apply from: "$rootDir/gradle/jacoco.gradle"
