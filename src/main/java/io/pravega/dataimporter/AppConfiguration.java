@@ -20,6 +20,7 @@ import io.pravega.client.stream.Stream;
 import io.pravega.client.stream.StreamCut;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.connectors.flink.PravegaConfig;
+import io.pravega.dataimporter.utils.PravegaKeycloakCredentialsFromString;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,9 @@ import static org.apache.flink.api.common.ExecutionConfig.PARALLELISM_UNKNOWN;
  * This class can be extended for job-specific configuration parameters.
  */
 public class AppConfiguration {
-    final private static Logger log = LoggerFactory.getLogger(AppConfiguration.class);
-
     public static final String ACTION_PARAMETER = "action-type";
+
+    final private static Logger log = LoggerFactory.getLogger(AppConfiguration.class);
 
     private final ParameterTool params;
     private final int parallelism;
@@ -57,14 +58,10 @@ public class AppConfiguration {
     private final String avroSchema;
 
     /**
-     * Static factory method that returns a new {@link AppConfiguration}.
-     */
-    public static AppConfiguration createAppConfiguration(Map<String, String> args) throws IOException {
-        return new AppConfiguration(args);
-    }
-
-    /**
      * Creates a new instance of the AppConfiguration class.
+     * 
+     * @param args command-line arguments
+     * @throws IOException failed to read avroSchemaFile
      */
     private AppConfiguration(Map<String, String> args) throws IOException {
         params = ParameterTool.fromMap(args);
@@ -93,6 +90,19 @@ public class AppConfiguration {
         }
     }
 
+    /**
+     * Static factory method that returns a new {@link AppConfiguration}.
+     * @param args command-line arguments
+     * @return new AppConfiguration of parsed arguments
+     * @throws IOException failed to read avroSchemaFile
+     */
+    public static AppConfiguration createAppConfiguration(Map<String, String> args) throws IOException {
+        return new AppConfiguration(args);
+    }
+
+    /**
+     * Returns String representation of AppConfiguration.
+     */
     @Override
     public String toString() {
         return "AppConfiguration{" +
@@ -110,14 +120,14 @@ public class AppConfiguration {
     }
 
     /**
-     * Returns application parameters
+     * Returns application parameters.
      */
     public ParameterTool getParams() {
         return params;
     }
 
     /**
-     * Returns stream configuration
+     * Returns stream configuration.
      *
      * @param argName Info about the stream such as "input" or "output"
      */
@@ -183,6 +193,7 @@ public class AppConfiguration {
 
     /**
      * Returns job name for the app configuration.
+     * @param defaultJobName the default job name to return if jobName is not set
      */
     public String getJobName(String defaultJobName) {
         return (jobName == null) ? defaultJobName : jobName;
@@ -211,6 +222,8 @@ public class AppConfiguration {
 
         /**
          * Creates a new instance of the StreamConfig class.
+         * @param argName prefix string used to pull matching stream parameters
+         * @param globalParams all parameters provided to the application
          */
         public StreamConfig(final String argName, final ParameterTool globalParams) {
             final String argPrefix = argName.isEmpty() ? argName : argName + "-";
@@ -233,22 +246,22 @@ public class AppConfiguration {
             tempPravegaConfig = tempPravegaConfig.withDefaultScope(stream.getScope());
 
             final String keycloakConfigBase64 = params.get("keycloak", "");
-            /*if (!keycloakConfigBase64.isEmpty()) {
+            if (!keycloakConfigBase64.isEmpty()) {
                 // Add Keycloak credentials. This is decoded as base64 to avoid complications with JSON in arguments.
                 log.info("Loading base64-encoded Keycloak credentials from parameter {}keycloak.", argPrefix);
                 final String keycloakConfig = new String(Base64.getDecoder().decode(keycloakConfigBase64), StandardCharsets.UTF_8);
                 tempPravegaConfig = tempPravegaConfig.withCredentials(new PravegaKeycloakCredentialsFromString(keycloakConfig));
-            } else {*/
+            } else {
                 // Add username/password credentials.
                 final String username = params.get("username", "");
                 final String password = params.get("password", "");
                 if (!username.isEmpty() || !password.isEmpty()) {
                     tempPravegaConfig = tempPravegaConfig.withCredentials(new DefaultCredentials(password, username));
                 }
-            //}
+            }
 
             pravegaConfig = tempPravegaConfig;
-            targetRate = params.getInt("targetRate", 10*1024*1024);  // data rate in KiB/sec
+            targetRate = params.getInt("targetRate", 10 * 1024 * 1024);  // data rate in KiB/sec
             scaleFactor = params.getInt("scaleFactor", 2);
             minNumSegments = params.getInt("minNumSegments", 1);
             startStreamCut = StreamCut.from(params.get("startStreamCut", StreamCut.UNBOUNDED.asText()));
@@ -257,6 +270,9 @@ public class AppConfiguration {
             endAtTail = params.getBoolean("endAtTail", false);
         }
 
+        /**
+         * Returns StreamConfig in String format.
+         */
         @Override
         public String toString() {
             return "StreamConfig{" +

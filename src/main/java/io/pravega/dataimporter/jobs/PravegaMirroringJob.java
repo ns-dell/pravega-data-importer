@@ -71,7 +71,7 @@ public class PravegaMirroringJob extends AbstractJob {
      */
     public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig,
                                                                       StreamCut startStreamCut,
-                                                                      StreamCut endStreamCut){
+                                                                      StreamCut endStreamCut) {
         return FlinkPravegaReader.<byte[]>builder()
                 .withPravegaConfig(inputStreamConfig.getPravegaConfig())
                 .forStream(inputStreamConfig.getStream(), startStreamCut, endStreamCut)
@@ -89,7 +89,7 @@ public class PravegaMirroringJob extends AbstractJob {
      */
     public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig,
                                                                boolean isStreamOrdered,
-                                                               PravegaWriterMode pravegaWriterMode){
+                                                               PravegaWriterMode pravegaWriterMode) {
         FlinkPravegaWriter.Builder<byte[]> flinkPravegaWriterBuilder = FlinkPravegaWriter.<byte[]>builder()
                 .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                 .forStream(outputStreamConfig.getStream())

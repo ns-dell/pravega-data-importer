@@ -37,7 +37,7 @@ public class ConsumerRecordByteArrayKafkaDeserializationSchema implements KafkaR
     @Override
     public void deserialize(ConsumerRecord<byte[], byte[]> record, Collector<PravegaRecord> out) {
         HashMap<String, byte[]> headers = new HashMap<>();
-        for (Header header: record.headers()){
+        for (Header header: record.headers()) {
             headers.put(header.key(), header.value());
         }
         out.collect(new PravegaRecord(record.key(), record.value(), headers, record.partition(), record.topic(), record.timestamp()));

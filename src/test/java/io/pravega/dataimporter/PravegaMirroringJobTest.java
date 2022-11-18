@@ -1,9 +1,32 @@
+/**
+ * Copyright Pravega Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.pravega.dataimporter;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
-import io.pravega.client.stream.*;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.EventStreamWriter;
+import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.stream.ReaderConfig;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.Stream;
+import io.pravega.client.stream.StreamCut;
 import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaReader;
@@ -28,17 +51,17 @@ import java.util.Objects;
 
 public class PravegaMirroringJobTest {
 
-    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJobTest.class);
-
-    private static final int READER_TIMEOUT_MS = 2000;
-
     @ClassRule
-    public static MiniClusterWithClientResource flinkCluster =
+    final public static MiniClusterWithClientResource FLINK_CLUSTER =
             new MiniClusterWithClientResource(
                     new MiniClusterResourceConfiguration.Builder()
                             .setNumberSlotsPerTaskManager(2)
                             .setNumberTaskManagers(1)
                             .build());
+
+    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJobTest.class);
+
+    private static final int READER_TIMEOUT_MS = 2000;
 
     @Test
     public void testPravegaStreamMirroringJob() throws Exception {
@@ -46,14 +69,14 @@ public class PravegaMirroringJobTest {
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put("action-type", "stream-mirroring");
         argsMap.put("input-stream", "localScope/localStream");
-        argsMap.put("input-controller", "tcp://localhost:9090");
+        argsMap.put("input-controller", "tcp://localhost:9091");
         argsMap.put("input-startAtTail", String.valueOf(false));
         argsMap.put("output-stream", "remoteScope/remoteStream");
         argsMap.put("output-controller", "tcp://127.0.0.1:9990");
 
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
-        PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345, "localScope", "localStream");
+        PravegaTestResource localTestResource = new PravegaTestResource(9091, 12345, "localScope", "localStream");
         localTestResource.start();
 
         PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456, "remoteScope", "remoteStream");
@@ -64,7 +87,7 @@ public class PravegaMirroringJobTest {
         final StreamCut startStreamCut = AbstractJob.resolveStartStreamCut(inputStreamConfig);
         final StreamCut endStreamCut = AbstractJob.resolveEndStreamCut(inputStreamConfig);
 
-        final FlinkPravegaReader<byte[]> source = PravegaMirroringJob.createFlinkPravegaReader(inputStreamConfig,startStreamCut,endStreamCut);
+        final FlinkPravegaReader<byte[]> source = PravegaMirroringJob.createFlinkPravegaReader(inputStreamConfig, startStreamCut, endStreamCut);
         final FlinkPravegaWriter<byte[]> sink = PravegaMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
 
         StreamExecutionEnvironment testEnvironment = AbstractJob.initializeFlinkStreaming(appConfiguration, false);
@@ -95,12 +118,11 @@ public class PravegaMirroringJobTest {
         testValues.add("testValue3".getBytes());
         EventStreamWriter<byte[]> localWriter = localFactory
                 .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
-        for (byte[] testValue: testValues){
+        for (byte[] testValue : testValues) {
             localWriter.writeEvent(testValue).join();
             log.info("Wrote event {}%n", testValue);
         }
         localWriter.close();
-
 
         URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());
 

@@ -82,9 +82,9 @@
     </module>
 
     <!-- dependencies -->
-    <module name="ImportControl">
+    <!-- <module name="ImportControl">
       <property name="file" value="${importControlFile}"/>
-    </module>
+    </module> -->
 
     <!-- whitespace -->
     <module name="GenericWhitespace"/>

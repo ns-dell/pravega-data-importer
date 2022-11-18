@@ -25,14 +25,15 @@ import org.slf4j.LoggerFactory;
  * The action will create or connect to an existing stream on the output cluster.
  */
 public class KafkaMirroringAction extends AbstractAction {
-    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringAction.class);
-
     public final static String NAME = "kafka-stream-mirroring";
+
+    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringAction.class);
 
     private final AppConfiguration config;
 
     /**
      * Creates a new instance of the KafkaMirroringAction class.
+     * @param config app configs
      */
     public KafkaMirroringAction(AppConfiguration config) {
         this.config = config;

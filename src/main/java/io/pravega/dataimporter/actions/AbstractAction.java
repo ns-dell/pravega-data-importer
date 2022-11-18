@@ -55,6 +55,8 @@ public abstract class AbstractAction {
     /**
      * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
      * If the stream exists, it is unchanged.
+     * @param streamConfig stream configuration
+     * @param streamTag tag to place on the stream
      */
     public static void createStream(AppConfiguration.StreamConfig streamConfig, String streamTag) {
         try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {

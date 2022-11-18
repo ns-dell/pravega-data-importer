@@ -42,7 +42,7 @@ public class ActionFactory {
         }
     }
 
-    public static int createActionSubmitJob(Map<String, String> argsMap){
+    public static int createActionSubmitJob(Map<String, String> argsMap) {
         AppConfiguration configuration;
         try {
             configuration = AppConfiguration.createAppConfiguration(argsMap);

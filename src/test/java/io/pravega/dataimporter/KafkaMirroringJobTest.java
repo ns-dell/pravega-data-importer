@@ -1,9 +1,29 @@
+/**
+ * Copyright Pravega Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.pravega.dataimporter;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
-import io.pravega.client.stream.*;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReaderConfig;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.Stream;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
@@ -28,6 +48,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static io.pravega.dataimporter.jobs.KafkaMirroringJob.createFlinkPravegaWriterForPravegaRecord;
 import static io.pravega.dataimporter.jobs.KafkaMirroringJob.createKafkaSourceForPravegaRecord;
@@ -90,12 +111,12 @@ public class KafkaMirroringJobTest {
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
         final AppConfiguration.StreamConfig outputStreamConfig = appConfiguration.getStreamConfig("output");
-        final String bootstrap_servers = appConfiguration.getParams().get(
-                "bootstrap.servers","localhost:9092");
+        final String bootstrapServers = appConfiguration.getParams().get(
+                "bootstrap.servers", "localhost:9092");
         final String kafkaTopic = appConfiguration.getParams().get("input-topic");
 
         final KafkaSource<PravegaRecord> kafkaSource =
-                createKafkaSourceForPravegaRecord(bootstrap_servers, kafkaTopic);
+                createKafkaSourceForPravegaRecord(bootstrapServers, kafkaTopic);
 
         StreamExecutionEnvironment testEnvironment = AbstractJob.initializeFlinkStreaming(
                 appConfiguration, false);
@@ -148,8 +169,8 @@ public class KafkaMirroringJobTest {
                     //There are certain circumstances where the reader needs to be reinitialized
                     e.printStackTrace();
                 }
-//            } while (Objects.requireNonNull(event).getEvent() != null);
-            } while (count < 3);
+            } while (Objects.requireNonNull(event).getEvent() != null);
+            //} while (count < 3);
             log.info("No more events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
         }
 

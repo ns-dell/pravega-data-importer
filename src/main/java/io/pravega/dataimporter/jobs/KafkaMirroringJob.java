@@ -64,29 +64,42 @@ public class KafkaMirroringJob extends AbstractJob {
         this.env = env;
     }
 
+    /**
+     * Create and configure the KafkaSource to replicate streams from.
+     * @param bootstrapServers servers string for KafkaSource.builder().setBootstrapServers()
+     * @param kafkaTopic topic to mirror to Pravega
+     * @return constructed KafkaSource
+     */
     public static KafkaSource<PravegaRecord> createKafkaSourceForPravegaRecord(
-            String bootstrap_servers,
-            String kafkaTopic){
+            String bootstrapServers,
+            String kafkaTopic) {
         return KafkaSource.<PravegaRecord>builder()
-                .setBootstrapServers(bootstrap_servers)
+                .setBootstrapServers(bootstrapServers)
                 .setTopics(Collections.singletonList(kafkaTopic))
                 .setDeserializer(new ConsumerRecordByteArrayKafkaDeserializationSchema())
                 .build();
     }
 
+    /**
+     * Create and configure the FlinkPravegaWriter to replicate streams to.
+     * @param outputStreamConfig stream config
+     * @param isStreamOrdered are the events in the source Kafka Topic ordered?
+     * @param pravegaWriterMode at-least-once or exactly-once semantics
+     * @return constructed FlinkPravegaWriter
+     */
     public static FlinkPravegaWriter<PravegaRecord> createFlinkPravegaWriterForPravegaRecord(
             AppConfiguration.StreamConfig outputStreamConfig,
             boolean isStreamOrdered,
-            PravegaWriterMode pravegaWriterMode){
+            PravegaWriterMode pravegaWriterMode) {
         FlinkPravegaWriter.Builder<PravegaRecord> flinkPravegaWriterBuilder = FlinkPravegaWriter.<PravegaRecord>builder()
                 .withPravegaConfig(outputStreamConfig.getPravegaConfig())
                 .forStream(outputStreamConfig.getStream())
                 .withSerializationSchema(new PravegaSerializationSchema<>(new JavaSerializer<>()));
-        if (isStreamOrdered){
+        if (isStreamOrdered) {
             // ordered write, multi-partition.
             // routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
             flinkPravegaWriterBuilder.withEventRouter(event ->
-                    (event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition())));
+                    event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition()));
         }
         flinkPravegaWriterBuilder.withWriterMode(pravegaWriterMode);
 
@@ -104,11 +117,11 @@ public class KafkaMirroringJob extends AbstractJob {
             final boolean isStreamOrdered = getConfig().getParams().getBoolean("isStreamOrdered", true);
             log.info("isStreamOrdered: {}", isStreamOrdered);
 
-            final String bootstrap_servers = getConfig().getParams().get(
-                    "bootstrap.servers","localhost:9092");
+            final String bootstrapServers = getConfig().getParams().get(
+                    "bootstrap.servers", "localhost:9092");
             final String kafkaTopic = getConfig().getParams().get("input-topic");
             final KafkaSource<PravegaRecord> kafkaSource =
-                    createKafkaSourceForPravegaRecord(bootstrap_servers, kafkaTopic);
+                    createKafkaSourceForPravegaRecord(bootstrapServers, kafkaTopic);
 
             final DataStream<PravegaRecord> toOutput =
                     env.fromSource(

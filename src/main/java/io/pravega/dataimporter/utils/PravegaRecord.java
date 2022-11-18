@@ -33,6 +33,12 @@ public class PravegaRecord implements Serializable {
 
     /**
      * Creates a new instance of the PravegaRecord class.
+     * @param key the key of the record
+     * @param value the value of the record
+     * @param headers the headers in the record
+     * @param partition the partition in Kafka that the record came from
+     * @param topic the topic in Kafka that the record came from
+     * @param timestamp the timestamp of the record in Kafka
      */
     public PravegaRecord(byte[] key, byte[] value, HashMap<String, byte[]> headers, int partition, String topic,
                          long timestamp) {

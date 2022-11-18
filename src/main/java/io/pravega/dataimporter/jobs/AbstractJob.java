@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An abstract job class for Flink Pravega applications.
  */
-public abstract class AbstractJob{
+public abstract class AbstractJob {
     final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
     private final AppConfiguration config;
@@ -59,6 +59,7 @@ public abstract class AbstractJob{
 
     /**
      * Get head and tail stream cuts for a Pravega stream.
+     * @param streamConfig stream configuration
      */
     public static StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
         try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
@@ -69,6 +70,7 @@ public abstract class AbstractJob{
     /**
      * Convert UNBOUNDED start StreamCut to a concrete StreamCut, pointing to the current head or tail of the stream
      * (depending on isStartAtTail).
+     * @param streamConfig stream configuration
      */
     public static StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isStartAtTail()) {
@@ -84,6 +86,7 @@ public abstract class AbstractJob{
      * For bounded reads (indicated by isEndAtTail), convert UNBOUNDED end StreamCut to a concrete StreamCut,
      * pointing to the current tail of the stream.
      * For unbounded reads, returns UNBOUNDED.
+     * @param streamConfig stream configuration
      */
     public static StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isEndAtTail()) {
@@ -109,10 +112,9 @@ public abstract class AbstractJob{
         String host = config.getParams().get("flinkHost", "localhost");
         int port = config.getParams().getInt("flinkPort", 8081);
         String jarFiles = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
-        if (remoteCluster){
-            env = StreamExecutionEnvironment.createRemoteEnvironment(host,port,jarFiles);
-        }
-        else {
+        if (remoteCluster) {
+            env = StreamExecutionEnvironment.createRemoteEnvironment(host, port, jarFiles);
+        } else {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
         }
         // Make parameters show in Flink UI.
