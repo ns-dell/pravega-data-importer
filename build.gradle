@@ -16,10 +16,12 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.3'
     id "com.github.spotbugs" version "${spotbugsVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
+    id "jacoco"
 }
 
 apply from: "$rootDir/gradle/checkstyle.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
+apply from: "$rootDir/gradle/jacoco.gradle"
 
 group = "io.pravega"
 description = "Pravega Flink Tools"
