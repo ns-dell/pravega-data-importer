@@ -56,6 +56,9 @@ public class AppConfiguration {
     private final String jobName;
     private final String avroSchema;
 
+    /**
+     * Static factory method that returns a new {@link AppConfiguration}.
+     */
     public static AppConfiguration createAppConfiguration(Map<String, String> args) throws IOException {
         return new AppConfiguration(args);
     }
@@ -83,7 +86,7 @@ public class AppConfiguration {
             if (avroSchemaFileName.isEmpty()) {
                 avroSchema = "";
             } else {
-                avroSchema = new String(Files.readAllBytes(Paths.get(avroSchemaFileName)), StandardCharsets.UTF_8);
+                avroSchema = Files.readString(Paths.get(avroSchemaFileName));
             }
         } else {
             avroSchema = new String(Base64.getDecoder().decode(avroSchemaBase64), StandardCharsets.UTF_8);
@@ -91,9 +94,6 @@ public class AppConfiguration {
     }
 
     @Override
-    /**
-     * Returns String representation of AppConfiguration
-     */
     public String toString() {
         return "AppConfiguration{" +
                 "parallelism=" + parallelism +
@@ -258,9 +258,6 @@ public class AppConfiguration {
         }
 
         @Override
-        /**
-         * Returns StreamConfig in String format.
-         */
         public String toString() {
             return "StreamConfig{" +
                     "stream=" + stream +
