@@ -51,7 +51,7 @@ public class PravegaMirroringJobTest {
         argsMap.put("output-stream", "remoteScope/remoteStream");
         argsMap.put("output-controller", "tcp://127.0.0.1:9990");
 
-        AppConfiguration appConfiguration = new AppConfiguration(argsMap);
+        AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
         PravegaTestResource localTestResource = new PravegaTestResource(9090, 12345, "localScope", "localStream");
         localTestResource.start();
