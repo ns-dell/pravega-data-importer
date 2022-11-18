@@ -36,9 +36,7 @@ application {
     mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.Main"
 }
 
-group 'org.example'
 version '1.0-SNAPSHOT'
-
 
 repositories {
     mavenLocal()
