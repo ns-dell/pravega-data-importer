@@ -10,12 +10,13 @@ import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.jobs.AbstractJob;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+import net.mguenther.kafka.junit.KeyValue;
+import net.mguenther.kafka.junit.SendKeyValues;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
 
 import static io.pravega.dataimporter.jobs.KafkaMirroringJob.createFlinkPravegaWriterForPravegaRecord;
 import static io.pravega.dataimporter.jobs.KafkaMirroringJob.createKafkaSourceForPravegaRecord;
@@ -62,12 +64,13 @@ public class KafkaMirroringJobTest {
     @Test
     public void testKafkaToPravegaStreamJob() throws Exception {
 
-        kafka.send(to("test-topic",
-                new ConsumerRecord<>("test-topic",
-                        1,
-                        0L,
-                        "key1".getBytes(),
-                        "value1".getBytes())));
+        List<KeyValue<String, String>> records = new ArrayList<>();
+
+        records.add(new KeyValue<>("a", "b"));
+        records.add(new KeyValue<>("c", "d"));
+        records.add(new KeyValue<>("e", "f"));
+
+        kafka.send(SendKeyValues.to("test-topic", records));
 
         PravegaTestResource remoteTestResource = new PravegaTestResource(
                 9090,
@@ -84,7 +87,7 @@ public class KafkaMirroringJobTest {
         argsMap.put("bootstrap.servers", "localhost:9092");
         argsMap.put("isStreamOrdered", String.valueOf(true));
 
-        AppConfiguration appConfiguration = new AppConfiguration(argsMap);
+        AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
         final AppConfiguration.StreamConfig outputStreamConfig = appConfiguration.getStreamConfig("output");
         final String bootstrap_servers = appConfiguration.getParams().get(
@@ -133,22 +136,23 @@ public class KafkaMirroringJobTest {
                      ReaderConfig.builder().build())) {
             log.info("Reading all the events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
             EventRead<PravegaRecord> event = null;
+            int count = 0;
             do {
                 try {
                     event = reader.readNextEvent(READER_TIMEOUT_MS);
                     if (event.getEvent() != null) {
                         log.info("Read event '{}'%n", event);
+                        count++;
                     }
                 } catch (ReinitializationRequiredException e) {
                     //There are certain circumstances where the reader needs to be reinitialized
                     e.printStackTrace();
                 }
-            } while (Objects.requireNonNull(event).getEvent() != null);
+//            } while (Objects.requireNonNull(event).getEvent() != null);
+            } while (count < 3);
             log.info("No more events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
         }
 
         remoteTestResource.stop();
-
-//        reader.close();
     }
 }

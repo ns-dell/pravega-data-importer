@@ -15,6 +15,7 @@
  */
 package io.pravega.dataimporter.actions;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.pravega.dataimporter.AppConfiguration;
 
 import java.io.IOException;
@@ -28,7 +29,8 @@ public class ActionFactory {
     /**
      * Method that instantiates concrete implementations of AbstractAction from an input String and AppConfiguration.
      */
-    private AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
+    @VisibleForTesting
+    static AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
         switch (actionType) {
 
             case PravegaMirroringAction.NAME:
@@ -43,14 +45,14 @@ public class ActionFactory {
     public static int createActionSubmitJob(Map<String, String> argsMap){
         AppConfiguration configuration;
         try {
-            configuration = new AppConfiguration(argsMap);
+            configuration = AppConfiguration.createAppConfiguration(argsMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         // STEP 1: Instantiate the Action based on input parameter
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = new ActionFactory().instantiateAction(actionType, configuration);
+        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
 
         // STEP 2: Run the metadata workflow for the action.
         dataImportAction.commitMetadataChanges();

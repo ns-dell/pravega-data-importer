@@ -56,10 +56,14 @@ public class AppConfiguration {
     private final String jobName;
     private final String avroSchema;
 
+    public static AppConfiguration createAppConfiguration(Map<String, String> args) throws IOException {
+        return new AppConfiguration(args);
+    }
+
     /**
      * Creates a new instance of the AppConfiguration class.
      */
-    public AppConfiguration(Map<String, String> args) throws IOException {
+    private AppConfiguration(Map<String, String> args) throws IOException {
         params = ParameterTool.fromMap(args);
         log.info("Parameter Tool: {}", getParams().toMap());
         parallelism = getParams().getInt("parallelism", PARALLELISM_UNKNOWN);
