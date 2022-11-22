@@ -15,25 +15,25 @@
  */
 package io.pravega.dataimporter.actions;
 
+import io.pravega.client.admin.StreamManager;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.local.InProcPravegaCluster;
 import io.pravega.local.LocalPravegaEmulator;
 import io.pravega.test.common.TestUtils;
 import lombok.Cleanup;
-import org.junit.Before;
-import io.pravega.client.admin.StreamManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.HashMap;
 
 import static io.pravega.local.LocalPravegaEmulator.LocalPravegaEmulatorBuilder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+/**
+ * Unit test class for KafkaMirroringAction
+ */
 public class KafkaMirroringActionTest {
 
     final String streamScope = "testScope";
@@ -44,6 +44,9 @@ public class KafkaMirroringActionTest {
     boolean tlsEnabled = false;
     LocalPravegaEmulator localPravega;
 
+    /**
+     * Initiates LocalPravegaEmulator for use in unit tests.
+     */
     @BeforeEach
     public void setUp() throws Exception {
         LocalPravegaEmulatorBuilder emulatorBuilder = LocalPravegaEmulator.builder()
