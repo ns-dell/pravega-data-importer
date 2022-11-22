@@ -54,7 +54,7 @@ public class KafkaMirroringAction extends AbstractAction {
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
         log.info("output stream: {}", outputStreamConfig);
-        AbstractAction.createStream(outputStreamConfig, "kafka-mirror");
+        AbstractAction.createStream(outputStreamConfig, NAME);
     }
 
     /**

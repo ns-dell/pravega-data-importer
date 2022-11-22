@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter;
+package io.pravega.dataimporter.integration;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
@@ -32,6 +32,7 @@ import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaReader;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
+import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
 import io.pravega.dataimporter.jobs.PravegaMirroringJob;
 import org.apache.flink.core.execution.JobClient;
@@ -49,7 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class PravegaMirroringJobTest {
+public class PravegaMirroringJobIntegrationTest {
 
     @ClassRule
     final public static MiniClusterWithClientResource FLINK_CLUSTER =
@@ -59,7 +60,7 @@ public class PravegaMirroringJobTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJobTest.class);
+    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJobIntegrationTest.class);
 
     private static final int READER_TIMEOUT_MS = 2000;
 
@@ -76,10 +77,10 @@ public class PravegaMirroringJobTest {
 
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
-        PravegaTestResource localTestResource = new PravegaTestResource(9091, 12345, "localScope", "localStream");
+        PravegaIntegrationTestResource localTestResource = new PravegaIntegrationTestResource(9091, 12345, "localScope", "localStream");
         localTestResource.start();
 
-        PravegaTestResource remoteTestResource = new PravegaTestResource(9990, 23456, "remoteScope", "remoteStream");
+        PravegaIntegrationTestResource remoteTestResource = new PravegaIntegrationTestResource(9990, 23456, "remoteScope", "remoteStream");
         remoteTestResource.start();
 
         final AppConfiguration.StreamConfig inputStreamConfig = appConfiguration.getStreamConfig("input");

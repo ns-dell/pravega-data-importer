@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter;
+package io.pravega.dataimporter.integration;
 
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.ScalingPolicy;
@@ -31,7 +31,7 @@ import java.time.Duration;
  * <code>pravega.controller.uri</code> system property will contain the
  * Pravega Controller URI.
  */
-public class PravegaTestResource {
+public class PravegaIntegrationTestResource {
 
     private static final String PRAVEGA_VERSION = "0.12.0";
     private static final String PRAVEGA_IMAGE = "pravega/pravega:" + PRAVEGA_VERSION;
@@ -43,7 +43,7 @@ public class PravegaTestResource {
     private final GenericContainer<?> container;
 
     @SuppressWarnings("deprecation")
-    public PravegaTestResource(int controllerPort, int segmentStorePort, String streamScope, String streamName) {
+    public PravegaIntegrationTestResource(int controllerPort, int segmentStorePort, String streamScope, String streamName) {
         this.controllerPort = controllerPort;
         this.segmentStorePort = segmentStorePort;
         this.streamScope = streamScope;

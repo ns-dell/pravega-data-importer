@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter;
+package io.pravega.dataimporter.integration;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
@@ -27,6 +27,7 @@ import io.pravega.client.stream.Stream;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
+import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
 import io.pravega.dataimporter.utils.PravegaRecord;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
@@ -57,9 +58,9 @@ import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultCluste
 import static net.mguenther.kafka.junit.ObserveKeyValues.on;
 import static net.mguenther.kafka.junit.SendValues.to;
 
-public class KafkaMirroringJobTest {
+public class KafkaMirroringJobIntegrationTest {
 
-    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJobTest.class);
+    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJobIntegrationTest.class);
 
     private static final int READER_TIMEOUT_MS = 2000;
 
@@ -93,7 +94,7 @@ public class KafkaMirroringJobTest {
 
         kafka.send(SendKeyValues.to("test-topic", records));
 
-        PravegaTestResource remoteTestResource = new PravegaTestResource(
+        PravegaIntegrationTestResource remoteTestResource = new PravegaIntegrationTestResource(
                 9090,
                 12345,
                 "remoteScope",

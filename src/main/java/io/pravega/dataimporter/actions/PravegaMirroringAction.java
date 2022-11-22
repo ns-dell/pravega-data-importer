@@ -47,10 +47,10 @@ public class PravegaMirroringAction extends AbstractAction {
     public void commitMetadataChanges() {
         final AppConfiguration.StreamConfig inputStreamConfig = getConfig().getStreamConfig("input");
         log.info("input stream: {}", inputStreamConfig);
-        AbstractAction.createStream(inputStreamConfig, "mirror");
+        AbstractAction.createStream(inputStreamConfig, NAME);
         final AppConfiguration.StreamConfig outputStreamConfig = getConfig().getStreamConfig("output");
         log.info("output stream: {}", outputStreamConfig);
-        AbstractAction.createStream(outputStreamConfig, "mirror");
+        AbstractAction.createStream(outputStreamConfig, NAME);
     }
 
     @Override
