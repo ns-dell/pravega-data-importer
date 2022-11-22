@@ -100,7 +100,7 @@ dependencies {
     testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
     testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
     testImplementation 'io.pravega:pravega-standalone:0.12.0'
-    testImplementation 'io.pravega:pravega-test-testcommon:0.12.0'
+    testImplementation 'io.pravega:pravega-test-integration:0.12.0'
 
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
 
