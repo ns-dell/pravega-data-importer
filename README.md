@@ -13,8 +13,8 @@ Pravega Data Importer is a collection of Apache Flink applications for importing
 
 It provides the following Flink jobs:
 
-- **stream-mirroring**: Continuously copy a Pravega stream to another Pravega stream, even on a different Pravega cluster
-- **kafka-stream-mirroring**: Continuously copy a Kafka stream to a Pravega stream
+- **stream-mirroring**: Continuously copy a Pravega Stream to another Pravega Stream, even on a different Pravega cluster
+- **kafka-stream-mirroring**: Continuously copy a Kafka topic to a Pravega Stream
 
 Each job uses Flink checkpoints to provide exactly-once guarantees, ensuring that events
 are never missed nor duplicated.
@@ -25,31 +25,25 @@ To learn more about Pravega, visit http://pravega.io
 
 ## Prerequisites
 
-- Java JDK 8.x.
+- Java JDK 11+.
   On Ubuntu, this can be installed with:
   ```shell script
-  sudo apt-get install openjdk-8-jdk
+  sudo apt-get install openjdk-11-jdk
   ```
 
 - A [Pravega](http://pravega.io) installation
 - A [Flink](https://flink.apache.org/) installation
 
-- The deployment scripts in this project are designed to work with
-  Dell EMC Streaming Data Platform (SDP).
-  These Flink tools may also be used in other Flink installations,
-  including open-source, although the exact
-  deployment methods depend on your environment and are not documented here.
-
-## Stream-Mirroring: Continuously copying a Pravega stream to another Pravega stream
+## Stream-Mirroring: Continuously copying a Pravega Stream to another Pravega Stream
 
 ### Overview
 
-This Flink job will continuously copy a Pravega stream to another Pravega stream.
+This Flink job will continuously copy a Pravega Stream to another Pravega Stream.
 It uses Flink checkpoints to provide exactly-once guarantees, ensuring that events
 are never missed nor duplicated.
 It automatically recovers from failures and resumes where it left off.
 It can use parallelism for high-volume streams with multiple segments.
-It marks the associated input and output Pravega streams with stream tag `"mirror"`.
+It marks the associated input and output Pravega Streams with stream tag `"mirror"`.
 
 ### Run Locally
 
@@ -78,8 +72,8 @@ Running the following help commands in above directory show the parameters neede
 pravega-data-importer --help
 pravega-data-importer stream-mirroring --help
 ```
-This example takes a Pravega stream running at `localhost:9090` with stream `source/sourceStream` as input, and outputs to
-Pravega stream `destination/destinationStream` running at `localhost:9990`.
+This example takes a Pravega Stream running at `localhost:9090` with stream `source/sourceStream` as input, and outputs to
+Pravega Stream `destination/destinationStream` running at `localhost:9990`.
 ```shell
 pravega-data-importer
   stream-mirroring
@@ -105,15 +99,15 @@ bin/consoleWriter -scope <source> -name <sourceStream>
 After entering submitting some input to the `consoleWriter`,
 the same output should appear in the destination stream, showing that the job is working.
 
-## Kafka-Stream-Mirroring: Continuously copying a Kafka stream to another Pravega stream
+## Kafka-Stream-Mirroring: Continuously copying a Kafka topic to another Pravega Stream
 
 ### Overview
 
-This Flink job will continuously copy a Kafka stream to a Pravega stream.
+This Flink job will continuously copy a Kafka stream to a Pravega Stream.
 It uses Flink checkpoints to provide exactly-once guarantees, ensuring that events
 are never missed nor duplicated.
 It can use parallelism for high-volume streams with multiple segments.
-It marks the associated output Pravega stream with stream tag `"kafka-mirror"`.
+It marks the associated output Pravega Stream with stream tag `"kafka-mirror"`.
 
 ### Run Locally
 
@@ -142,7 +136,7 @@ pravega-data-importer --help
 pravega-data-importer kafka-stream-mirroring --help
 ```
 This example takes a Kafka stream running at `localhost:9092` with topic `test-input` and outputs to
-Pravega stream `destination/from-kafka` running at `localhost:9090`.
+Pravega Stream `destination/from-kafka` running at `localhost:9090`.
 ```shell
 pravega-data-importer
   kafka-stream-mirroring
