@@ -36,7 +36,7 @@ public class PravegaRecordTest {
      * conversion into {@link PravegaRecord} by {@link ConsumerRecordByteArrayKafkaDeserializationSchema}
      */
     @Test
-    public void testPravegaRecord(){
+    public void testPravegaRecord() {
         final String topic = "topic";
         final int partition = 0;
         final long offset = 0L;

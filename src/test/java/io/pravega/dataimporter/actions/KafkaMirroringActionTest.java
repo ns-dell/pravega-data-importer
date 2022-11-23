@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Unit test class for KafkaMirroringAction
  */
-//@RunWith(SerializedClassRunner.class)
 public class KafkaMirroringActionTest {
 
     @ClassRule

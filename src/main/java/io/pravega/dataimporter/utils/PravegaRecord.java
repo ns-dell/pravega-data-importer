@@ -90,8 +90,12 @@ public class PravegaRecord implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         PravegaRecord that = (PravegaRecord) o;
         return partition == that.partition
                 && timestamp == that.timestamp
@@ -99,5 +103,13 @@ public class PravegaRecord implements Serializable {
                 && Arrays.equals(value, that.value)
                 && Objects.equals(headers, that.headers)
                 && Objects.equals(topic, that.topic);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(headers, partition, topic, timestamp);
+        result = 31 * result + Arrays.hashCode(key);
+        result = 31 * result + Arrays.hashCode(value);
+        return result;
     }
 }
