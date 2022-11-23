@@ -16,7 +16,9 @@
 package io.pravega.dataimporter.utils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * A class containing data extracted from Apache Kafka's {@link org.apache.kafka.clients.consumer.ConsumerRecord}
@@ -74,4 +76,28 @@ public class PravegaRecord implements Serializable {
         return timestamp;
     }
 
+    @Override
+    public String toString() {
+        return "PravegaRecord{" +
+                "key=" + Arrays.toString(key) +
+                ", value=" + Arrays.toString(value) +
+                ", headers=" + headers +
+                ", partition=" + partition +
+                ", topic='" + topic + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PravegaRecord that = (PravegaRecord) o;
+        return partition == that.partition
+                && timestamp == that.timestamp
+                && Arrays.equals(key, that.key)
+                && Arrays.equals(value, that.value)
+                && Objects.equals(headers, that.headers)
+                && Objects.equals(topic, that.topic);
+    }
 }
