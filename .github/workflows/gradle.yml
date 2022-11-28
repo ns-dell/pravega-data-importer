@@ -44,7 +44,9 @@ env:
     **/build
 
   REPORTS_LOCATIONS: |
-    ./*/build/reports ./*/*/build/reports ./*/*/*/build/reports
+    ./build/reports
+    # if this becomes a multi-project build, look for nested build reports
+    #./*/build/reports ./*/*/build/reports ./*/*/*/build/reports
 
   # Set 'GRADLE_OPTS' to pass additional custom parameters to each ./gradlew invocation in this workflow.
   # Example '--info' or '--debug'.
@@ -140,6 +142,7 @@ jobs:
         run: ./gradlew spotbugsMain spotbugsTest --parallel ${{env.GRADLE_OPTS}}
   upload_reports:
     name: Upload Reports
+    if: ${{ always() }}
     needs: [test, spotbugs]
     runs-on: ubuntu-20.04
     steps:
@@ -153,10 +156,10 @@ jobs:
           restore-keys: |
             ${{github.ref}}
       - name: Tar Reports
-        run: tar --use-compress-program zstd -cf reports-${{github.job}}.tzst `echo ${{env.REPORTS_LOCATIONS}}`
+        run: tar --use-compress-program zstd -cf data-importer-build-reports-${{github.run_id}}-${{github.run_attempt}}.tzst `echo ${{env.REPORTS_LOCATIONS}}`
       - name: Upload Reports
         uses: actions/upload-artifact@v2
         with:
-          name: ${{github.job}}-reports
+          name: data-importer-build-reports-${{github.run_id}}-${{github.run_attempt}}
           retention-days: 4
-          path: reports-${{github.job}}.tzst
+          path: data-importer-build-reports-${{github.run_id}}-${{github.run_attempt}}.tzst
