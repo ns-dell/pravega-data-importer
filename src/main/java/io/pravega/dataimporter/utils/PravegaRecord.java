@@ -26,8 +26,8 @@ import java.util.Objects;
  */
 public class PravegaRecord implements Serializable {
 
-    private final byte[] key;
-    private final byte[] value;
+    public final byte[] key;
+    public final byte[] value;
     private final HashMap<String, byte[]> headers;
     private final int partition;
     private final String topic;
@@ -52,13 +52,13 @@ public class PravegaRecord implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public byte[] getKey() {
-        return key;
-    }
-
-    public byte[] getValue() {
-        return value;
-    }
+    //    public byte[] getKey() {
+    //        return key;
+    //    }
+    //
+    //    public byte[] getValue() {
+    //        return value;
+    //    }
 
     public HashMap<String, byte[]> getHeaders() {
         return new HashMap<>(headers);

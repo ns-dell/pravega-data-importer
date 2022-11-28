@@ -88,7 +88,7 @@ public class KafkaMirroringJob extends AbstractJob {
             // ordered write, multi-partition.
             // routing key taken from ConsumerRecord key if exists, else ConsumerRecord partition
             flinkPravegaWriterBuilder.withEventRouter(event ->
-                    event.getKey() != null ? Arrays.toString(event.getKey()) : String.valueOf(event.getPartition()));
+                    event.key != null ? Arrays.toString(event.key) : String.valueOf(event.getPartition()));
         }
         flinkPravegaWriterBuilder.withWriterMode(pravegaWriterMode);
 
