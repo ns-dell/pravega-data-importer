@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractJob {
     final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
+    final static String JAR_FILES_PATH = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
+
     private final AppConfiguration config;
 
     public AbstractJob(AppConfiguration config) {
@@ -111,9 +113,8 @@ public abstract class AbstractJob {
         StreamExecutionEnvironment env;
         String host = config.getParams().get("flinkHost", "localhost");
         int port = config.getParams().getInt("flinkPort", 8081);
-        String jarFiles = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
         if (remoteCluster) {
-            env = StreamExecutionEnvironment.createRemoteEnvironment(host, port, jarFiles);
+            env = StreamExecutionEnvironment.createRemoteEnvironment(host, port, JAR_FILES_PATH);
         } else {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
         }
