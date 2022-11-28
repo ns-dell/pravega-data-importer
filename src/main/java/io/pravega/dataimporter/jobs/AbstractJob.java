@@ -37,9 +37,10 @@ import org.slf4j.LoggerFactory;
  * An abstract job class for Flink Pravega applications.
  */
 public abstract class AbstractJob {
-    final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
     final static String JAR_FILES_PATH = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
+
+    final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
     private final AppConfiguration config;
 
