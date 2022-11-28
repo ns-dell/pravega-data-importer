@@ -47,7 +47,7 @@ public class PravegaRecord implements Serializable {
         this.key = key;
         this.value = value;
         this.partition = partition;
-        this.headers = headers;
+        this.headers = new HashMap<>(headers);
         this.topic = topic;
         this.timestamp = timestamp;
     }
@@ -61,7 +61,7 @@ public class PravegaRecord implements Serializable {
     }
 
     public HashMap<String, byte[]> getHeaders() {
-        return headers;
+        return new HashMap<>(headers);
     }
 
     public int getPartition() {

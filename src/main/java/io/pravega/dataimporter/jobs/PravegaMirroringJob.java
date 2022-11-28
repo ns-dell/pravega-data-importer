@@ -52,17 +52,6 @@ public class PravegaMirroringJob extends AbstractJob {
     }
 
     /**
-     * Creates a new instance of the PravegaMirroringJob class.
-     *
-     * @param appConfiguration The application parameters needed for configuration of a PravegaMirroringJob.
-     * @param env Users may supply their own Flink {@link StreamExecutionEnvironment}.
-     */
-    public PravegaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
-        super(appConfiguration);
-        this.env = env;
-    }
-
-    /**
      * Static factory for creating a FlinkPravegaReader. This is used in the Flink job as well as testing.
      *
      * @param inputStreamConfig Input Stream configuration needed for {@link FlinkPravegaReader}

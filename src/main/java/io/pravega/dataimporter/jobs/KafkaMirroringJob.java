@@ -54,17 +54,6 @@ public class KafkaMirroringJob extends AbstractJob {
     }
 
     /**
-     * Creates a new instance of the KafkaMirroringJob class.
-     *
-     * @param appConfiguration The application parameters needed for configuration of a KafkaMirroringJob.
-     * @param env Users may supply their own Flink {@link StreamExecutionEnvironment}.
-     */
-    public KafkaMirroringJob(AppConfiguration appConfiguration, StreamExecutionEnvironment env) {
-        super(appConfiguration);
-        this.env = env;
-    }
-
-    /**
      * Create and configure the KafkaSource to replicate streams from.
      * @param bootstrapServers servers string for KafkaSource.builder().setBootstrapServers()
      * @param kafkaTopic topic to mirror to Pravega
