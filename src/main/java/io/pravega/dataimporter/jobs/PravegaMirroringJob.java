@@ -22,20 +22,18 @@ import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ByteArrayDeserializationFormat;
 import io.pravega.dataimporter.utils.ByteArraySerializationFormat;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Continuously copy a Pravega stream to another Pravega stream.
  * This supports events with any serialization.
  * When writing events, a fixed routing key is used.
  */
+@Slf4j
 public class PravegaMirroringJob extends AbstractJob {
-
-    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringJob.class);
 
     final StreamExecutionEnvironment env;
 

@@ -16,19 +16,17 @@
 package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ActionFactoryTest {
 
     @Test
-    public void testActionFactory_KafkaMirroringAction() {
+    public void testKafkaMirroringAction() {
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put(AppConfiguration.ACTION_PARAMETER, KafkaMirroringAction.NAME);
         AppConfiguration configuration;
@@ -40,11 +38,11 @@ public class ActionFactoryTest {
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
         AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
-        assertThat(dataImportAction, instanceOf(KafkaMirroringAction.class));
+        assertTrue(dataImportAction instanceof KafkaMirroringAction);
     }
 
     @Test
-    public void testActionFactory_PravegaMirroringAction() {
+    public void testPravegaMirroringAction() {
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put(AppConfiguration.ACTION_PARAMETER, PravegaMirroringAction.NAME);
         AppConfiguration configuration;
@@ -56,11 +54,11 @@ public class ActionFactoryTest {
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
         AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
-        assertThat(dataImportAction, instanceOf(PravegaMirroringAction.class));
+        assertTrue(dataImportAction instanceof PravegaMirroringAction);
     }
 
     @Test
-    public void testActionFactory_fail() {
+    public void testActionFactoryFail() {
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put(AppConfiguration.ACTION_PARAMETER, "test");
         AppConfiguration configuration;

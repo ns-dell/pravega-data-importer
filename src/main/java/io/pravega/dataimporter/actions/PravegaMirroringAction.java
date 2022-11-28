@@ -17,16 +17,14 @@ package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.PravegaMirroringJob;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implements the workflow related to mirroring one Pravega Stream from one cluster to another.
  */
+@Slf4j
 public class PravegaMirroringAction extends AbstractAction {
     public final static String NAME = "stream-mirroring";
-
-    final private static Logger log = LoggerFactory.getLogger(PravegaMirroringAction.class);
 
     private final AppConfiguration config;
 

@@ -21,9 +21,8 @@ import io.pravega.client.stream.StreamCut;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.connectors.flink.PravegaConfig;
 import io.pravega.dataimporter.utils.PravegaKeycloakCredentialsFromString;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,11 +39,9 @@ import static org.apache.flink.api.common.ExecutionConfig.PARALLELISM_UNKNOWN;
  * A generic configuration class for Flink Pravega applications.
  * This class can be extended for job-specific configuration parameters.
  */
+@Slf4j
 public class AppConfiguration {
     public static final String ACTION_PARAMETER = "action-type";
-
-    final private static Logger log = LoggerFactory.getLogger(AppConfiguration.class);
-
     private final Map<String, String> params;
     private final int parallelism;
     private final int readerParallelism;
@@ -248,7 +245,7 @@ public class AppConfiguration {
             final String keycloakConfigBase64 = params.get("keycloak", "");
             if (!keycloakConfigBase64.isEmpty()) {
                 // Add Keycloak credentials. This is decoded as base64 to avoid complications with JSON in arguments.
-                log.info("Loading base64-encoded Keycloak credentials from parameter {}keycloak.", argPrefix);
+                log.info("Loading base64-encoded Keycloak credentials from parameter {} keycloak.", argPrefix);
                 final String keycloakConfig = new String(Base64.getDecoder().decode(keycloakConfigBase64), StandardCharsets.UTF_8);
                 tempPravegaConfig = tempPravegaConfig.withCredentials(new PravegaKeycloakCredentialsFromString(keycloakConfig));
             } else {

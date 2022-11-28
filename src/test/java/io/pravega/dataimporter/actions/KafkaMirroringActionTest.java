@@ -71,6 +71,5 @@ public class KafkaMirroringActionTest {
 
         assertTrue(!beforeCheck && afterCheck);
         assertTrue(streamManager.getStreamTags(streamScope, streamName).contains(KafkaMirroringAction.NAME));
-
     }
 }

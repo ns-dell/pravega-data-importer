@@ -17,17 +17,16 @@ package io.pravega.dataimporter.actions;
 
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.KafkaMirroringJob;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class that represents the workflow for a Kafka Mirroring Action.
  * The action will create or connect to an existing stream on the output cluster.
  */
+@Slf4j
 public class KafkaMirroringAction extends AbstractAction {
-    public final static String NAME = "kafka-stream-mirroring";
 
-    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringAction.class);
+    public final static String NAME = "kafka-stream-mirroring";
 
     private final AppConfiguration config;
 

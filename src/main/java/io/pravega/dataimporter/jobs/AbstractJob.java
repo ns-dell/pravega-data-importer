@@ -19,6 +19,7 @@ import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamCut;
 import io.pravega.dataimporter.AppConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.LocalEnvironment;
@@ -30,18 +31,14 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract job class for Flink Pravega applications.
  */
+@Slf4j
 public abstract class AbstractJob {
 
     final static String JAR_FILES_PATH = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
-
-    final private static Logger log = LoggerFactory.getLogger(AbstractJob.class);
-
     private final AppConfiguration config;
 
     public AbstractJob(AppConfiguration config) {
