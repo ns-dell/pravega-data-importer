@@ -19,16 +19,14 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.jobs.AbstractJob;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.execution.JobClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Interface that all Actions should implement (mirroring, importing, etc.).
  */
+@Slf4j
 public abstract class AbstractAction {
-
-    final private static Logger log = LoggerFactory.getLogger(AbstractAction.class);
 
     protected AbstractJob job;
 
@@ -48,13 +46,14 @@ public abstract class AbstractAction {
      * Submits Flink job to Flink cluster, and logs the {@link org.apache.flink.api.common.JobID} of the submitted job.
      */
     public void submitDataImportJob() {
-        JobClient jobClient = job.submitJob();
+        JobClient jobClient = this.job.submitJob();
         log.info("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
     }
 
     /**
      * If the Pravega stream does not exist, creates a new stream with the specified stream configuration.
      * If the stream exists, it is unchanged.
+     *
      * @param streamConfig stream configuration
      * @param streamTag tag to place on the stream
      */

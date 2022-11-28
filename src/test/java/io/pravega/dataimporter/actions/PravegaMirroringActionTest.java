@@ -39,7 +39,6 @@ public class PravegaMirroringActionTest {
     final String streamScope = "testScope";
     final String streamName = "testStream";
 
-
     /**
      * Tests PravegaMirroringAction metadata changes.
      * Checks if action creates output stream with correct stream tag.

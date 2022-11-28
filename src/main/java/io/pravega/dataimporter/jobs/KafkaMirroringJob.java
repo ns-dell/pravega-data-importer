@@ -22,13 +22,12 @@ import io.pravega.connectors.flink.serialization.PravegaSerializationSchema;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.utils.ConsumerRecordByteArrayKafkaDeserializationSchema;
 import io.pravega.dataimporter.utils.PravegaRecord;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,8 +35,8 @@ import java.util.Collections;
 /**
  * Continuously copy a Kafka stream to a Pravega stream.
  */
+@Slf4j
 public class KafkaMirroringJob extends AbstractJob {
-    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJob.class);
 
     private final String jobName = getConfig().getJobName(KafkaMirroringJob.class.getName());
 

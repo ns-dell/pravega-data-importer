@@ -28,8 +28,11 @@ import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.connectors.flink.FlinkPravegaWriter;
 import io.pravega.connectors.flink.PravegaWriterMode;
 import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.PravegaEmulatorResource;
+import io.pravega.dataimporter.actions.KafkaMirroringAction;
 import io.pravega.dataimporter.jobs.AbstractJob;
 import io.pravega.dataimporter.utils.PravegaRecord;
+import lombok.extern.slf4j.Slf4j;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import net.mguenther.kafka.junit.KeyValue;
 import net.mguenther.kafka.junit.SendKeyValues;
@@ -42,8 +45,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -58,23 +59,23 @@ import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultCluste
 import static net.mguenther.kafka.junit.ObserveKeyValues.on;
 import static net.mguenther.kafka.junit.SendValues.to;
 
+@Slf4j
 public class KafkaMirroringJobIntegrationTest {
-
-    final private static Logger log = LoggerFactory.getLogger(KafkaMirroringJobIntegrationTest.class);
 
     private static final int READER_TIMEOUT_MS = 2000;
 
+    private PravegaEmulatorResource pravega;
     private EmbeddedKafkaCluster kafka;
 
     @BeforeEach
     void setupKafka() {
-        kafka = provisionWith(defaultClusterConfig());
-        kafka.start();
+        this.kafka = provisionWith(defaultClusterConfig());
+        this.kafka.start();
     }
 
     @AfterEach
     void tearDownKafka() {
-        kafka.stop();
+        this.kafka.stop();
     }
 
     @Test
@@ -85,6 +86,9 @@ public class KafkaMirroringJobIntegrationTest {
 
     @Test
     public void testKafkaToPravegaStreamJob() throws Exception {
+        final String kafkaTopicName = "test-topic";
+        final String pravegaScopeName = "test-scope";
+        final String pravegaStreamName = "test-stream";
 
         List<KeyValue<String, String>> records = new ArrayList<>();
 
@@ -92,19 +96,12 @@ public class KafkaMirroringJobIntegrationTest {
         records.add(new KeyValue<>("c", "d"));
         records.add(new KeyValue<>("e", "f"));
 
-        kafka.send(SendKeyValues.to("test-topic", records));
-
-        PravegaIntegrationTestResource remoteTestResource = new PravegaIntegrationTestResource(
-                9090,
-                12345,
-                "remoteScope",
-                "remoteStream");
-        remoteTestResource.start();
+        kafka.send(SendKeyValues.to(kafkaTopicName, records));
 
         HashMap<String, String> argsMap = new HashMap<>();
-        argsMap.put("action-type", "kafka-stream-mirroring");
-        argsMap.put("input-topic", "test-topic");
-        argsMap.put("output-stream", "remoteScope/remoteStream");
+        argsMap.put("action-type", KafkaMirroringAction.NAME);
+        argsMap.put("input-topic", kafkaTopicName);
+        argsMap.put("output-stream", Stream.of(pravegaScopeName, pravegaStreamName).getScopedName());
         argsMap.put("output-controller", "tcp://127.0.0.1:9990");
         argsMap.put("bootstrap.servers", "localhost:9092");
         argsMap.put("isStreamOrdered", String.valueOf(true));
@@ -112,8 +109,7 @@ public class KafkaMirroringJobIntegrationTest {
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
         final AppConfiguration.StreamConfig outputStreamConfig = appConfiguration.getStreamConfig("output");
-        final String bootstrapServers = appConfiguration.getParams().get(
-                "bootstrap.servers", "localhost:9092");
+        final String bootstrapServers = appConfiguration.getParams().get("bootstrap.servers", "localhost:9092");
         final String kafkaTopic = appConfiguration.getParams().get("input-topic");
 
         final KafkaSource<PravegaRecord> kafkaSource =
@@ -131,32 +127,31 @@ public class KafkaMirroringJobIntegrationTest {
         final FlinkPravegaWriter<PravegaRecord> sink = createFlinkPravegaWriterForPravegaRecord(
                 outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
 
-        toOutput
-                .addSink(sink)
+        toOutput.addSink(sink)
                 .uid("pravega-writer")
                 .name("Pravega writer to " + outputStreamConfig.getStream().getScopedName());
 
         JobClient jobClient = testEnvironment.executeAsync("TestKafkaStreamMirroringJob");
         System.out.println("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
 
-        URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());
+        URI remoteControllerURI = URI.create(this.pravega.getControllerURI());
 
         final String readerGroup = "remoteReaderGroup";
         final String readerId = "remoteReader";
         final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(Stream.of(remoteTestResource.getStreamScope(), remoteTestResource.getStreamName()))
+                .stream(Stream.of(pravegaScopeName, pravegaStreamName))
                 .build();
-        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(remoteTestResource.getStreamScope(), remoteControllerURI)) {
+        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(pravegaScopeName, remoteControllerURI)) {
             readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
         }
 
-        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(remoteTestResource.getStreamScope(),
+        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(pravegaScopeName,
                 ClientConfig.builder().controllerURI(remoteControllerURI).build());
              EventStreamReader<PravegaRecord> reader = clientFactory.createReader(readerId,
                      readerGroup,
                      new JavaSerializer<>(),
                      ReaderConfig.builder().build())) {
-            log.info("Reading all the events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
+            log.info("Reading all the events from {}/{}%n", pravegaScopeName, pravegaStreamName);
             EventRead<PravegaRecord> event = null;
             int count = 0;
             do {
@@ -171,10 +166,7 @@ public class KafkaMirroringJobIntegrationTest {
                     e.printStackTrace();
                 }
             } while (Objects.requireNonNull(event).getEvent() != null);
-            //} while (count < 3);
-            log.info("No more events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
+            log.info("No more events from {}/{}%n", pravegaScopeName, pravegaStreamName);
         }
-
-        remoteTestResource.stop();
     }
 }

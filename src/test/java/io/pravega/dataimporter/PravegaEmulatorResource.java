@@ -92,7 +92,7 @@ public class PravegaEmulatorResource extends ExternalResource {
                 .enableAuth(authEnabled)
                 .enableTls(tlsEnabled)
                 .tlsProtocolVersion(tlsProtocolVersion)
-                .enabledAdminGateway(true)
+                .enabledAdminGateway(false)
                 .adminGatewayPort(TestUtils.getAvailableListenPort());
 
         // Since the server is being built right here, avoiding delegating these conditions to subclasses via factory
@@ -115,8 +115,6 @@ public class PravegaEmulatorResource extends ExternalResource {
 
         pravega = emulatorBuilder.build();
     }
-
-
 
     @Override
     protected void before() throws Exception {

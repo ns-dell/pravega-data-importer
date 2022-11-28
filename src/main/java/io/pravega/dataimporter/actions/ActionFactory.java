@@ -32,7 +32,6 @@ public class ActionFactory {
     @VisibleForTesting
     static AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
         switch (actionType) {
-
             case PravegaMirroringAction.NAME:
                 return new PravegaMirroringAction(configuration);
             case KafkaMirroringAction.NAME:
