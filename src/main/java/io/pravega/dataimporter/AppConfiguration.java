@@ -45,7 +45,7 @@ public class AppConfiguration {
 
     final private static Logger log = LoggerFactory.getLogger(AppConfiguration.class);
 
-    private final ParameterTool params;
+    private final Map<String, String> params;
     private final int parallelism;
     private final int readerParallelism;
     private final long checkpointIntervalMs;
@@ -64,7 +64,7 @@ public class AppConfiguration {
      * @throws IOException failed to read avroSchemaFile
      */
     private AppConfiguration(Map<String, String> args) throws IOException {
-        params = ParameterTool.fromMap(args);
+        params = args;
         log.info("Parameter Tool: {}", getParams().toMap());
         parallelism = getParams().getInt("parallelism", PARALLELISM_UNKNOWN);
         readerParallelism = getParams().getInt("readerParallelism", PARALLELISM_DEFAULT);
@@ -123,7 +123,7 @@ public class AppConfiguration {
      * Returns application parameters.
      */
     public ParameterTool getParams() {
-        return params;
+        return ParameterTool.fromMap(params);
     }
 
     /**
