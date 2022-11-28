@@ -13,7 +13,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id 'com.github.johnrengelman.shadow' version '4.0.3'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id "com.github.spotbugs" version "${spotbugsPluginVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
     id "checkstyle"
