@@ -13,7 +13,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '4.0.3'
     id "com.github.spotbugs" version "${spotbugsPluginVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
     id "checkstyle"
@@ -29,14 +29,14 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 apply from: "$rootDir/gradle/jacoco.gradle"
 
 group = "io.pravega"
-description = "Pravega Data Importer"
+description = "Pravega Flink Tools"
 
 // Allow main class name to be specified with -PmainClass=xxx.
 application {
     mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.Main"
 }
 
-version '0.1.0-SNAPSHOT'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -66,50 +66,53 @@ shadowJar {
     configurations = [project.configurations.flinkShadowJar]
 }
 
+lombok {
+    version = lombokVersion
+}
+
 dependencies {
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
     compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
     compileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
+    testCompileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
     annotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
     testAnnotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
+    implementation "org.apache.flink:flink-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-api-java-bridge:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-planner_${flinkScalaVersion}:${flinkVersion}"
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
+    implementation "org.apache.flink:flink-runtime-web:${flinkVersion}"
+    implementation "org.apache.flink:flink-core:${flinkVersion}"
     implementation "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
-    implementation "io.pravega:pravega-client:0.12.0"
+    implementation "io.pravega:pravega-client:0.11.0"
     implementation "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
+    implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
     implementation 'info.picocli:picocli:4.7.0'
-    implementation "com.google.guava:guava:${guavaVersion}"
+    testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
+    testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
+    testImplementation 'io.pravega:pravega-standalone:0.12.0'
+    testImplementation 'io.pravega:pravega-test-integration:0.12.0'
+
+    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
     flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+
     // Schema registry dependencies required due to https://github.com/pravega/flink-connectors/issues/440
-    flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: pravegaSchemaRegistryVersion
+    flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
 
-    testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
-    testImplementation 'io.pravega:pravega-standalone:0.12.0'
-    testImplementation 'io.pravega:pravega-test-integration:0.12.0'
-    testImplementation 'io.pravega:pravega-common:0.12.0'
-    //implementation 'io.pravega:pravega-common:0.12.0'
-    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testCompileOnly "junit:junit:${junitVersion}"
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
-    testCompileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
-
-    testCompileOnly "com.google.guava:guava:${guavaVersion}"
-    testImplementation "com.google.guava:guava:${guavaVersion}"
-
-    configurations.all {
-        resolutionStrategy {
-            force "com.google.guava:guava:" + guavaVersion
-            force "io.grpc:grpc-context:1.47.0"
-            //exclude group: 'com.google.guava:guava', module: 'guava'
-        }
-    }
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 }
 
 // make compileOnly dependencies available for tests:
@@ -124,10 +127,6 @@ sourceSets {
 }
 
 run.classpath = sourceSets.main.runtimeClasspath
-
-tasks.withType(Test) {
-    jvmArgs = ["-Xmx2g"]
-}
 
 jar {
     manifest {
