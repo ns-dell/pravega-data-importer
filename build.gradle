@@ -36,8 +36,6 @@ application {
     mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "io.pravega.dataimporter.Main"
 }
 
-version '1.0-SNAPSHOT'
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -136,7 +134,7 @@ jar {
 }
 
 task copyToLib(type: Copy) {
-    into "lib"
+    into "${flinkShadowJarDirectory}"
     from shadowJar
 }
 
