@@ -13,7 +13,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id 'com.github.johnrengelman.shadow' version '4.0.3'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id "com.github.spotbugs" version "${spotbugsPluginVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
     id "checkstyle"
@@ -29,7 +29,7 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 apply from: "$rootDir/gradle/jacoco.gradle"
 
 group = "io.pravega"
-description = "Pravega Flink Tools"
+description = "Pravega Data Importer"
 
 // Allow main class name to be specified with -PmainClass=xxx.
 application {
