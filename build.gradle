@@ -133,6 +133,11 @@ jar {
     }
 }
 
+clean.doFirst {
+    delete "${flinkShadowJarDirectory}/" + "pravega-data-importer" + "-" + "${version}-all" + ".jar"
+    println "Deleting existing ${flinkShadowJarDirectory}/" + "pravega-data-importer" + "-" + "${version}-all" + ".jar"
+}
+
 task copyToLib(type: Copy) {
     into "${flinkShadowJarDirectory}"
     from shadowJar
