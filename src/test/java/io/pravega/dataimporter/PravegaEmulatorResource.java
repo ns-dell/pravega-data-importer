@@ -15,162 +15,53 @@
  */
 package io.pravega.dataimporter;
 
-import io.pravega.client.ClientConfig;
-import io.pravega.client.admin.StreamManager;
-import io.pravega.client.admin.impl.StreamManagerImpl;
-import io.pravega.client.control.impl.ControllerImplConfig;
-import io.pravega.local.LocalPravegaEmulator;
-import io.pravega.shared.security.auth.DefaultCredentials;
-import io.pravega.test.common.SecurityConfigDefaults;
-import io.pravega.test.common.TestUtils;
-import lombok.Builder;
-import lombok.Cleanup;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+
 import org.junit.rules.ExternalResource;
-
-import java.net.URI;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertNotNull;
+import org.testcontainers.containers.FixedHostPortGenericContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 /**
- * This class contains the rules to start and stop LocalPravega / standalone.
- * This resource can be configured for a test using @ClassRule and it will ensure standalone is started once
- * for all the methods in a test and is shutdown once all the tests methods have completed execution.
- *
- * - Usage pattern to start it once for all @Test methods in a class
- *  <pre>
- *  &#64;ClassRule
- *  public static final PravegaEmulatorResource EMULATOR = new PravegaEmulatorResource(false, false, false);
- *  </pre>
- *  - Usage pattern to start it before every @Test method.
- *  <pre>
- *  &#64;Rule
- *  public final PravegaEmulatorResource emulator = new PravegaEmulatorResource(false, false, false);
- *  </pre>
- *
+ * Runs a standalone Pravega cluster in-process.
+ * <p>
+ * <code>pravega.controller.uri</code> system property will contain the
+ * Pravega Controller URI.
  */
-@Slf4j
-@Builder
 public class PravegaEmulatorResource extends ExternalResource {
-    final boolean authEnabled;
-    final boolean tlsEnabled;
-    final boolean restEnabled;
-    final String[] tlsProtocolVersion;
-    final LocalPravegaEmulator pravega;
 
-    public static final class PravegaEmulatorResourceBuilder {
-        boolean authEnabled = false;
-        boolean tlsEnabled = false;
-        boolean restEnabled = false;
-        String[] tlsProtocolVersion = SecurityConfigDefaults.TLS_PROTOCOL_VERSION;
+    private static final String PRAVEGA_VERSION = "0.12.0";
+    private static final int CONTROLLER_HOST_PORT = 9091;
+    private static final int CONTROLLER_CONTAINER_PORT = 9090;
+    private static final int SEGMENT_STORE_PORT = 12345;
+    private static final String PRAVEGA_IMAGE = "pravega/pravega:" + PRAVEGA_VERSION;
 
-        public PravegaEmulatorResource build() {
-            return new PravegaEmulatorResource(authEnabled, tlsEnabled, restEnabled, tlsProtocolVersion);
-        }
-    }
-    /**
-     * Create an instance of Pravega Emulator resource.
-     * @param authEnabled Authorisation enable flag.
-     * @param tlsEnabled  Tls enable flag.
-     * @param restEnabled REST endpoint enable flag.
-     * @param tlsProtocolVersion TlsProtocolVersion
-     */
+    @SuppressWarnings("deprecation")
+    private final GenericContainer<?> container = new FixedHostPortGenericContainer<>(PRAVEGA_IMAGE)
+            .withFixedExposedPort(CONTROLLER_HOST_PORT, CONTROLLER_CONTAINER_PORT)
+            .withFixedExposedPort(SEGMENT_STORE_PORT, SEGMENT_STORE_PORT)
+            .withStartupTimeout(Duration.ofSeconds(90))
+            .waitingFor(Wait.forLogMessage(".*Pravega Sandbox is running locally now.*", 1))
+            .withCommand("standalone");
 
-    public PravegaEmulatorResource(boolean authEnabled, boolean tlsEnabled, boolean restEnabled, String[] tlsProtocolVersion) {
-        this.authEnabled = authEnabled;
-        this.tlsEnabled = tlsEnabled;
-        this.restEnabled = restEnabled;
-        this.tlsProtocolVersion = Arrays.copyOf(tlsProtocolVersion, tlsProtocolVersion.length);
-        LocalPravegaEmulator.LocalPravegaEmulatorBuilder emulatorBuilder = LocalPravegaEmulator.builder()
-                .controllerPort(TestUtils.getAvailableListenPort())
-                .segmentStorePort(TestUtils.getAvailableListenPort())
-                .zkPort(TestUtils.getAvailableListenPort())
-                .restServerPort(TestUtils.getAvailableListenPort())
-                .enableRestServer(restEnabled)
-                .enableAuth(authEnabled)
-                .enableTls(tlsEnabled)
-                .tlsProtocolVersion(tlsProtocolVersion)
-                .enabledAdminGateway(false)
-                .adminGatewayPort(TestUtils.getAvailableListenPort());
-
-        // Since the server is being built right here, avoiding delegating these conditions to subclasses via factory
-        // methods. This is so that it is easy to see the difference in server configs all in one place. This is also
-        // unlike the ClientConfig preparation which is being delegated to factory methods to make their preparation
-        // explicit in the respective test classes.
-
-        if (authEnabled) {
-            emulatorBuilder.passwdFile(SecurityConfigDefaults.AUTH_HANDLER_INPUT_PATH)
-                    .userName(SecurityConfigDefaults.AUTH_ADMIN_USERNAME)
-                    .passwd(SecurityConfigDefaults.AUTH_ADMIN_PASSWORD);
-        }
-        if (tlsEnabled) {
-            emulatorBuilder.certFile(SecurityConfigDefaults.TLS_SERVER_CERT_PATH)
-                    .keyFile(SecurityConfigDefaults.TLS_SERVER_PRIVATE_KEY_PATH)
-                    .jksKeyFile(SecurityConfigDefaults.TLS_SERVER_KEYSTORE_PATH)
-                    .jksTrustFile(SecurityConfigDefaults.TLS_CLIENT_TRUSTSTORE_PATH)
-                    .keyPasswordFile(SecurityConfigDefaults.TLS_PASSWORD_PATH);
-        }
-
-        pravega = emulatorBuilder.build();
+    @Override
+    public void before() {
+        container.start();
     }
 
     @Override
-    protected void before() throws Exception {
-        pravega.start();
-        waitUntilHealthy();
-    }
-
-    /**
-     * Return the ClientConfig based on the Pravega standalone configuration.
-     *
-     * @return ClientConfig
-     */
-    public ClientConfig getClientConfig() {
-        ClientConfig.ClientConfigBuilder builder = ClientConfig.builder()
-                .controllerURI(URI.create(pravega.getInProcPravegaCluster().getControllerURI()));
-        if (authEnabled) {
-            builder.credentials(new DefaultCredentials(
-                    SecurityConfigDefaults.AUTH_ADMIN_PASSWORD,
-                    SecurityConfigDefaults.AUTH_ADMIN_USERNAME));
+    public void after() {
+        try {
+            if (container != null) {
+                container.stop();
+            }
+        } catch (Exception e) {
+            // ignored
         }
-        if (tlsEnabled) {
-            builder.trustStore(SecurityConfigDefaults.TLS_CA_CERT_PATH)
-                    .validateHostName(false);
-        }
-        return builder.build();
-    }
-
-    @SneakyThrows
-    @Override
-    protected void after() {
-        pravega.close();
-    }
-
-    /*
-     * Wait until Pravega standalone is up and running.
-     */
-    private void waitUntilHealthy() {
-        ClientConfig clientConfig = getClientConfig();
-        ControllerImplConfig controllerConfig = ControllerImplConfig.builder()
-                .clientConfig(clientConfig)
-                .retryAttempts(20)
-                .initialBackoffMillis(1000)
-                .backoffMultiple(2)
-                .maxBackoffMillis(10000)
-                .build();
-        @Cleanup
-        StreamManager streamManager = new StreamManagerImpl(clientConfig, controllerConfig);
-        assertNotNull(streamManager);
-        // Try creating a scope. This will retry based on the provided retry configuration.
-        // If all the retries fail a RetriesExhaustedException will be thrown failing the tests.
-        boolean isScopeCreated = streamManager.createScope("healthCheck-scope");
-        log.debug("Health check scope creation is successful {}", isScopeCreated);
     }
 
     public String getControllerURI() {
-        return this.pravega.getInProcPravegaCluster().getControllerURI();
+        return "tcp://" + container.getHost() + ":" + container.getMappedPort(CONTROLLER_CONTAINER_PORT);
     }
-}
 
+}

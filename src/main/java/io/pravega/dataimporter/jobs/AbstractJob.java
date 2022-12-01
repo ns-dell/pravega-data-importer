@@ -36,9 +36,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  * An abstract job class for Flink Pravega applications.
  */
 @Slf4j
+@SuppressWarnings("deprecation")
 public abstract class AbstractJob {
 
-    final static String JAR_FILES_PATH = "lib/pravega-data-importer-1.0-SNAPSHOT.jar";
+    final static String JAR_FILES_PATH = "lib/pravega-data-importer-0.1.0-SNAPSHOT.jar";
     private final AppConfiguration config;
 
     public AbstractJob(AppConfiguration config) {

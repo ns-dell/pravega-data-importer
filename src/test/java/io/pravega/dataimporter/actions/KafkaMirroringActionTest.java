@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class KafkaMirroringActionTest {
 
     @ClassRule
-    public static final PravegaEmulatorResource EMULATOR = PravegaEmulatorResource.builder().build();
+    public static final PravegaEmulatorResource EMULATOR = new PravegaEmulatorResource();
 
     final String streamScope = "testScope";
     final String streamName = "testStream";

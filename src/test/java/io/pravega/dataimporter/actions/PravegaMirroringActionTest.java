@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PravegaMirroringActionTest {
 
     @ClassRule
-    public static final PravegaEmulatorResource EMULATOR = PravegaEmulatorResource.builder().build();
+    public static final PravegaEmulatorResource EMULATOR = new PravegaEmulatorResource();
 
     final String streamScope = "testScope";
     final String streamName = "testStream";
@@ -42,9 +43,10 @@ public class PravegaMirroringActionTest {
     /**
      * Tests PravegaMirroringAction metadata changes.
      * Checks if action creates output stream with correct stream tag.
+     * @throws IOException 
      */
     @Test
-    public void testPravegaMirroringAction() {
+    public void testPravegaMirroringAction() throws IOException {
 
         String controllerURI = EMULATOR.getControllerURI();
 
@@ -55,21 +57,19 @@ public class PravegaMirroringActionTest {
         final boolean beforeCheck = streamManager.checkStreamExists(streamScope, streamName);
 
         HashMap<String, String> argsMap = new HashMap<>();
-        argsMap.put(AppConfiguration.ACTION_PARAMETER, KafkaMirroringAction.NAME);
+        argsMap.put(AppConfiguration.ACTION_PARAMETER, PravegaMirroringAction.NAME);
         argsMap.put("output-stream", scopedStreamName);
         AppConfiguration configuration;
-        try {
-            configuration = AppConfiguration.createAppConfiguration(argsMap);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        configuration = AppConfiguration.createAppConfiguration(argsMap);
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        ActionFactory.instantiateAction(actionType, configuration);
+        PravegaMirroringAction action = (PravegaMirroringAction) ActionFactory.instantiateAction(actionType, configuration);
+        action.commitMetadataChanges();
 
         final boolean afterCheck = streamManager.checkStreamExists(streamScope, streamName);
 
-        assertTrue(!beforeCheck && afterCheck);
+        assertFalse(beforeCheck, "scope and stream already existed");
+        assertTrue(afterCheck, "scope and stream weren't created");
         assertTrue(streamManager.getStreamTags(streamScope, streamName).contains(PravegaMirroringAction.NAME));
     }
 }
