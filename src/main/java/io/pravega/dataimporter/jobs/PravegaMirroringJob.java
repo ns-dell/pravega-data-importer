@@ -43,10 +43,12 @@ public class PravegaMirroringJob extends AbstractJob {
      * Creates a new instance of the PravegaMirroringJob class.
      *
      * @param appConfiguration The application parameters needed for configuration of a PravegaMirroringJob.
+     * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster. Setting this
+     *                     parameter to false is useful for testing.
      */
-    public PravegaMirroringJob(AppConfiguration appConfiguration) {
+    public PravegaMirroringJob(AppConfiguration appConfiguration, boolean remoteCluster) {
         super(appConfiguration);
-        env = initializeFlinkStreaming(appConfiguration, true);
+        env = initializeFlinkStreaming(appConfiguration, remoteCluster);
     }
 
     /**

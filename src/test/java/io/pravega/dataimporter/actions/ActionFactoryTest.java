@@ -37,7 +37,7 @@ public class ActionFactoryTest {
         }
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
+        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration, false);
         assertTrue(dataImportAction instanceof KafkaMirroringAction);
     }
 
@@ -53,7 +53,7 @@ public class ActionFactoryTest {
         }
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
+        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration, false);
         assertTrue(dataImportAction instanceof PravegaMirroringAction);
     }
 
@@ -69,6 +69,6 @@ public class ActionFactoryTest {
         }
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        assertThrows(IllegalArgumentException.class, () -> ActionFactory.instantiateAction(actionType, configuration));
+        assertThrows(IllegalArgumentException.class, () -> ActionFactory.instantiateAction(actionType, configuration, false));
     }
 }

@@ -33,10 +33,12 @@ public class KafkaMirroringAction extends AbstractAction {
     /**
      * Creates a new instance of the KafkaMirroringAction class.
      * @param config app configs
+     * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster. Setting this
+     *                     parameter to false is useful for testing.
      */
-    public KafkaMirroringAction(AppConfiguration config) {
+    public KafkaMirroringAction(AppConfiguration config, boolean remoteCluster) {
         this.config = config;
-        super.job = new KafkaMirroringJob(this.config);
+        super.job = new KafkaMirroringJob(this.config, remoteCluster);
     }
 
     /**
