@@ -60,6 +60,12 @@ configurations {
     flinkShadowJar.exclude group: 'log4j'
 }
 
+configurations.all {
+    resolutionStrategy {
+        force "com.google.guava:guava:" + guavaVersion
+    }
+}
+
 shadowJar {
     configurations = [project.configurations.flinkShadowJar]
 }
@@ -87,8 +93,8 @@ dependencies {
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
     implementation "org.apache.flink:flink-runtime-web:${flinkVersion}"
     implementation "org.apache.flink:flink-core:${flinkVersion}"
-    implementation "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
-    implementation "io.pravega:pravega-client:0.11.0"
+//    implementation "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
+//    implementation "io.pravega:pravega-client:0.12.0"
     implementation "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
@@ -104,9 +110,10 @@ dependencies {
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
     flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+    implementation 'io.pravega:pravega-shared-security:0.12.0'
 
     // Schema registry dependencies required due to https://github.com/pravega/flink-connectors/issues/440
-    flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
+    //    flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testCompileOnly "junit:junit:${junitVersion}"
