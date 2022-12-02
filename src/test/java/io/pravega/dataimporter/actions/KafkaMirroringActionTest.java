@@ -65,7 +65,7 @@ public class KafkaMirroringActionTest {
         }
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        ActionFactory.instantiateAction(actionType, configuration);
+        ActionFactory.instantiateAction(actionType, configuration, false);
 
         final boolean afterCheck = streamManager.checkStreamExists(streamScope, streamName);
 

@@ -27,15 +27,19 @@ import java.util.Map;
 public class ActionFactory {
 
     /**
-     * Method that instantiates concrete implementations of AbstractAction from an input String and AppConfiguration.
+     * Method that instantiates concrete implementations of AbstractAction.
+     * @param actionType input String based on name of action
+     * @param configuration application configuration
+     * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster. Setting this
+     *                      parameter to false is useful for testing.
      */
     @VisibleForTesting
-    static AbstractAction instantiateAction(String actionType, AppConfiguration configuration) {
+    static AbstractAction instantiateAction(String actionType, AppConfiguration configuration, boolean remoteCluster) {
         switch (actionType) {
             case PravegaMirroringAction.NAME:
-                return new PravegaMirroringAction(configuration);
+                return new PravegaMirroringAction(configuration, remoteCluster);
             case KafkaMirroringAction.NAME:
-                return new KafkaMirroringAction(configuration);
+                return new KafkaMirroringAction(configuration, remoteCluster);
             default:
                 throw new IllegalArgumentException("Unknown action type.");
         }
@@ -51,7 +55,7 @@ public class ActionFactory {
 
         // STEP 1: Instantiate the Action based on input parameter
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration);
+        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration, true);
 
         // STEP 2: Run the metadata workflow for the action.
         dataImportAction.commitMetadataChanges();

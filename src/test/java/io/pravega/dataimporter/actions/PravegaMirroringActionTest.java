@@ -63,7 +63,7 @@ public class PravegaMirroringActionTest {
         configuration = AppConfiguration.createAppConfiguration(argsMap);
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        PravegaMirroringAction action = (PravegaMirroringAction) ActionFactory.instantiateAction(actionType, configuration);
+        PravegaMirroringAction action = (PravegaMirroringAction) ActionFactory.instantiateAction(actionType, configuration, false);
         action.commitMetadataChanges();
 
         final boolean afterCheck = streamManager.checkStreamExists(streamScope, streamName);

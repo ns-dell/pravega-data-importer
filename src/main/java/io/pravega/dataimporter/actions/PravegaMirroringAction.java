@@ -31,10 +31,12 @@ public class PravegaMirroringAction extends AbstractAction {
     /**
      * Creates a new instance of the PravegaMirroringAction class.
      * @param config app configs
+     * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster. Setting this
+     *                      parameter to false is useful for testing.
      */
-    public PravegaMirroringAction(AppConfiguration config) {
+    public PravegaMirroringAction(AppConfiguration config, boolean remoteCluster) {
         this.config = config;
-        super.job = new PravegaMirroringJob(this.config);
+        super.job = new PravegaMirroringJob(this.config, remoteCluster);
     }
 
     public AppConfiguration getConfig() {
