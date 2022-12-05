@@ -54,10 +54,12 @@ public class PravegaMirroringActionTest {
 
         @Cleanup
         StreamManager streamManager = StreamManager.create(URI.create(controllerURI));
+        streamManager.createScope(streamScope);
         final boolean beforeCheck = streamManager.checkStreamExists(streamScope, streamName);
 
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put(AppConfiguration.ACTION_PARAMETER, PravegaMirroringAction.NAME);
+        argsMap.put("output-controller", controllerURI);
         argsMap.put("output-stream", scopedStreamName);
         AppConfiguration configuration;
         configuration = AppConfiguration.createAppConfiguration(argsMap);
