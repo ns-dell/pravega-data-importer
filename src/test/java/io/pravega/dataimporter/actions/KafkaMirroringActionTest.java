@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 
+import static io.pravega.dataimporter.actions.ActionFactory.instantiateAction;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -52,10 +54,12 @@ public class KafkaMirroringActionTest {
 
         @Cleanup
         StreamManager streamManager = StreamManager.create(URI.create(controllerURI));
+        streamManager.createScope(streamScope);
         final boolean beforeCheck = streamManager.checkStreamExists(streamScope, streamName);
 
         HashMap<String, String> argsMap = new HashMap<>();
         argsMap.put(AppConfiguration.ACTION_PARAMETER, KafkaMirroringAction.NAME);
+        argsMap.put("output-controller", controllerURI);
         argsMap.put("output-stream", scopedStreamName);
         AppConfiguration configuration;
         try {
@@ -65,11 +69,13 @@ public class KafkaMirroringActionTest {
         }
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        ActionFactory.instantiateAction(actionType, configuration, false);
+        KafkaMirroringAction action = (KafkaMirroringAction) ActionFactory.instantiateAction(actionType, configuration, false);
+        action.commitMetadataChanges();
 
         final boolean afterCheck = streamManager.checkStreamExists(streamScope, streamName);
 
-        assertTrue(!beforeCheck && afterCheck);
+        assertFalse(beforeCheck, "scope and stream already existed");
+        assertTrue(afterCheck, "scope and stream weren't created");
         assertTrue(streamManager.getStreamTags(streamScope, streamName).contains(KafkaMirroringAction.NAME));
     }
 }
