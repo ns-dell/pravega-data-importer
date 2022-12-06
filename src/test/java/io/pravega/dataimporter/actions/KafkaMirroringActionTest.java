@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 
-import static io.pravega.dataimporter.actions.ActionFactory.instantiateAction;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
