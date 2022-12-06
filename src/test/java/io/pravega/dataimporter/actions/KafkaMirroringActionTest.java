@@ -46,7 +46,7 @@ public class KafkaMirroringActionTest {
      * Checks if action creates output stream with correct stream tag.
      */
     @Test
-    public void testKafkaMirroringAction() {
+    public void testKafkaMirroringAction() throws IOException {
 
         String controllerURI = EMULATOR.getControllerURI();
 
@@ -62,11 +62,8 @@ public class KafkaMirroringActionTest {
         argsMap.put("output-controller", controllerURI);
         argsMap.put("output-stream", scopedStreamName);
         AppConfiguration configuration;
-        try {
-            configuration = AppConfiguration.createAppConfiguration(argsMap);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        configuration = AppConfiguration.createAppConfiguration(argsMap);
 
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
         KafkaMirroringAction action = (KafkaMirroringAction) ActionFactory.instantiateAction(actionType, configuration, false);

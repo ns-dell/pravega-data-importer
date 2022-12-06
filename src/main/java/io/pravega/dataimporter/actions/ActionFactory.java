@@ -45,7 +45,7 @@ public class ActionFactory {
         }
     }
 
-    public static int createActionSubmitJob(Map<String, String> argsMap) {
+    public static int createActionSubmitJob(Map<String, String> argsMap, boolean remoteCluster) {
         AppConfiguration configuration;
         try {
             configuration = AppConfiguration.createAppConfiguration(argsMap);
@@ -55,7 +55,7 @@ public class ActionFactory {
 
         // STEP 1: Instantiate the Action based on input parameter
         String actionType = configuration.getParams().get(AppConfiguration.ACTION_PARAMETER);
-        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration, true);
+        AbstractAction dataImportAction = ActionFactory.instantiateAction(actionType, configuration, remoteCluster);
 
         // STEP 2: Run the metadata workflow for the action.
         dataImportAction.commitMetadataChanges();

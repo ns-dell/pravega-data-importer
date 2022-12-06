@@ -85,6 +85,6 @@ public class PravegaMirroringCommand implements Callable<Integer> {
         argsMap.put("flinkHost", flinkHost);
         argsMap.put("flinkPort", String.valueOf(flinkPort));
 
-        return ActionFactory.createActionSubmitJob(argsMap);
+        return ActionFactory.createActionSubmitJob(argsMap, true);
     }
 }
