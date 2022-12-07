@@ -15,11 +15,32 @@
  */
 package io.pravega.dataimporter.integration;
 
+import io.pravega.client.ClientConfig;
+import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.admin.StreamManager;
+import io.pravega.client.stream.*;
+import io.pravega.client.stream.impl.JavaSerializer;
+import io.pravega.dataimporter.AppConfiguration;
+import io.pravega.dataimporter.PravegaEmulatorResource;
+import io.pravega.dataimporter.actions.AbstractAction;
+import io.pravega.dataimporter.actions.ActionFactory;
+import io.pravega.dataimporter.actions.PravegaMirroringAction;
+import io.pravega.dataimporter.utils.PravegaRecord;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 public class PravegaMirroringJobIntegrationTest {
@@ -32,103 +53,99 @@ public class PravegaMirroringJobIntegrationTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    private static final int READER_TIMEOUT_MS = 2000;
+    @ClassRule
+    public static final PravegaEmulatorResource INPUT_EMULATOR = PravegaEmulatorResource.builder().build();
+
+    @ClassRule
+    public static final PravegaEmulatorResource OUTPUT_EMULATOR = PravegaEmulatorResource.builder().build();
+    final String inputStreamScope = "inputScope";
+    final String inputStreamName = "inputStream";
+    final String outputStreamScope = "outputScope";
+    final String outputStreamName = "outputStream";
+    private static final int READER_TIMEOUT_MS = 10000;
 
     @Test
     public void testPravegaStreamMirroringJob() throws Exception {
 
-        /*HashMap<String, String> argsMap = new HashMap<>();
-        argsMap.put("action-type", "stream-mirroring");
-        argsMap.put("input-stream", "localScope/localStream");
-        argsMap.put("input-controller", "tcp://localhost:9091");
-        argsMap.put("input-startAtTail", String.valueOf(false));
-        argsMap.put("output-stream", "remoteScope/remoteStream");
-        argsMap.put("output-controller", "tcp://127.0.0.1:9990");
+        final String inputControllerURI = INPUT_EMULATOR.getControllerURI();
+        final String outputControllerURI = OUTPUT_EMULATOR.getControllerURI();
+
+        HashMap<String, String> argsMap = new HashMap<>();
+        argsMap.put("action-type", PravegaMirroringAction.NAME);
+        argsMap.put("input-stream", Stream.of(inputStreamScope, inputStreamName).getScopedName());
+        argsMap.put("input-controller", inputControllerURI);
+        argsMap.put("output-stream", Stream.of(outputStreamScope, outputStreamName).getScopedName());
+        argsMap.put("output-controller", outputControllerURI);
+        argsMap.put("isStreamOrdered", String.valueOf(true));
 
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
-        PravegaIntegrationTestResource localTestResource = new PravegaIntegrationTestResource(9091, 12345, "localScope", "localStream");
-        localTestResource.start();
+        @Cleanup
+        StreamManager inputStreamManager = StreamManager.create(URI.create(inputControllerURI));
+        inputStreamManager.createScope(inputStreamScope);
+        AbstractAction.createStream(appConfiguration.getStreamConfig("input"), PravegaMirroringAction.NAME);
 
-        PravegaIntegrationTestResource remoteTestResource = new PravegaIntegrationTestResource(9990, 23456, "remoteScope", "remoteStream");
-        remoteTestResource.start();
+        assertTrue(inputStreamManager.checkStreamExists(inputStreamScope, inputStreamName));
 
-        final AppConfiguration.StreamConfig inputStreamConfig = appConfiguration.getStreamConfig("input");
-        final AppConfiguration.StreamConfig outputStreamConfig = appConfiguration.getStreamConfig("output");
-        final StreamCut startStreamCut = AbstractJob.resolveStartStreamCut(inputStreamConfig);
-        final StreamCut endStreamCut = AbstractJob.resolveEndStreamCut(inputStreamConfig);
+        @Cleanup
+        StreamManager outputStreamManager = StreamManager.create(URI.create(outputControllerURI));
+        outputStreamManager.createScope(outputStreamScope);
 
-        final FlinkPravegaReader<byte[]> source = PravegaMirroringJob.createFlinkPravegaReader(inputStreamConfig, startStreamCut, endStreamCut);
-        final FlinkPravegaWriter<byte[]> sink = PravegaMirroringJob.createFlinkPravegaWriter(outputStreamConfig, true, PravegaWriterMode.EXACTLY_ONCE);
+        ActionFactory.createActionSubmitJob(argsMap, false);
 
-        StreamExecutionEnvironment testEnvironment = AbstractJob.initializeFlinkStreaming(appConfiguration, false);
-
-        final DataStream<byte[]> events = testEnvironment
-                .addSource(source)
-                .uid("test-reader")
-                .name("Test Pravega reader from " + inputStreamConfig.getStream().getScopedName());
-
-        events.addSink(sink)
-                .uid("test-writer")
-                .name("Test Pravega writer to " + outputStreamConfig.getStream().getScopedName());
-
-        JobClient jobClient = testEnvironment.executeAsync("TestPravegaStreamMirroringJob");
-        System.out.println("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
-
-        URI localControllerURI = URI.create(localTestResource.getControllerUri());
+        assertTrue(outputStreamManager.checkStreamExists(outputStreamScope, outputStreamName));
 
         ClientConfig localClientConfig = ClientConfig.builder()
-                .controllerURI(localControllerURI).build();
+                .controllerURI(URI.create(inputControllerURI)).build();
         EventWriterConfig writerConfig = EventWriterConfig.builder().build();
         EventStreamClientFactory localFactory = EventStreamClientFactory
-                .withScope(localTestResource.getStreamScope(), localClientConfig);
+                .withScope(inputStreamScope, localClientConfig);
 
-        ArrayList<byte[]> testValues = new ArrayList<>();
-        testValues.add("testValue1".getBytes());
-        testValues.add("testValue2".getBytes());
-        testValues.add("testValue3".getBytes());
+        ArrayList<byte[]> records = new ArrayList<>();
+        records.add("record1".getBytes());
+        records.add("record2".getBytes());
+        records.add("record3".getBytes());
         EventStreamWriter<byte[]> localWriter = localFactory
-                .createEventWriter(localTestResource.getStreamName(), new JavaSerializer<>(), writerConfig);
-        for (byte[] testValue : testValues) {
-            localWriter.writeEvent(testValue).join();
-            log.info("Wrote event {}%n", testValue);
+                .createEventWriter(inputStreamName, new JavaSerializer<>(), writerConfig);
+        for (byte[] record : records) {
+            localWriter.writeEvent(record).join();
+            log.info("Wrote event {}%n", record);
         }
         localWriter.close();
-
-        URI remoteControllerURI = URI.create(remoteTestResource.getControllerUri());
 
         final String readerGroup = "remoteReaderGroup";
         final String readerId = "remoteReader";
         final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(Stream.of(remoteTestResource.getStreamScope(), remoteTestResource.getStreamName()))
+                .stream(Stream.of(outputStreamScope, outputStreamName))
                 .build();
-        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(remoteTestResource.getStreamScope(), remoteControllerURI)) {
+        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(outputStreamScope, URI.create(outputControllerURI))) {
             readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
         }
 
-        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(remoteTestResource.getStreamScope(),
-                ClientConfig.builder().controllerURI(remoteControllerURI).build());
-             EventStreamReader<byte[]> reader = clientFactory.createReader(readerId,
+        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(outputStreamScope,
+                ClientConfig.builder().controllerURI(URI.create(outputControllerURI)).build());
+             EventStreamReader<PravegaRecord> reader = clientFactory.createReader(readerId,
                      readerGroup,
-                     new ByteArraySerializer(),
+                     new JavaSerializer<>(),
                      ReaderConfig.builder().build())) {
-            log.info("Reading all the events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
-            EventRead<byte[]> event = null;
+            log.info("Reading all the events from {}/{}", outputStreamScope, outputStreamName);
+            EventRead<PravegaRecord> event = null;
+            int count = 0;
             do {
                 try {
                     event = reader.readNextEvent(READER_TIMEOUT_MS);
                     if (event.getEvent() != null) {
-                        log.info("Read event '{}'%n", event);
+                        log.info("Read event '{}'", event);
+                        count++;
                     }
                 } catch (ReinitializationRequiredException e) {
                     //There are certain circumstances where the reader needs to be reinitialized
                     e.printStackTrace();
                 }
             } while (Objects.requireNonNull(event).getEvent() != null);
-            log.info("No more events from {}/{}%n", remoteTestResource.getStreamScope(), remoteTestResource.getStreamName());
-        }
+            log.info("No more events from {}/{}", outputStreamScope, outputStreamName);
 
-        localTestResource.stop();
-        remoteTestResource.stop();*/
+            assertEquals(records.size(), count);
+        }
     }
 }
