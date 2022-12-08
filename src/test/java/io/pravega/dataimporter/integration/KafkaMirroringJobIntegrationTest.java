@@ -132,8 +132,8 @@ public class KafkaMirroringJobIntegrationTest {
 
         assertTrue(streamManager.checkStreamExists(streamScope, streamName));
 
-        final String readerGroup = "remoteReaderGroup";
-        final String readerId = "remoteReader";
+        final String readerGroup = "outputReaderGroup";
+        final String readerId = "outputReader";
         final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
                 .stream(Stream.of(streamScope, streamName))
                 .build();

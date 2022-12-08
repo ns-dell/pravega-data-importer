@@ -95,26 +95,26 @@ public class PravegaMirroringJobIntegrationTest {
 
         assertTrue(outputStreamManager.checkStreamExists(outputStreamScope, outputStreamName));
 
-        ClientConfig localClientConfig = ClientConfig.builder()
+        ClientConfig inputClientConfig = ClientConfig.builder()
                 .controllerURI(URI.create(inputControllerURI)).build();
         EventWriterConfig writerConfig = EventWriterConfig.builder().build();
         EventStreamClientFactory localFactory = EventStreamClientFactory
-                .withScope(inputStreamScope, localClientConfig);
+                .withScope(inputStreamScope, inputClientConfig);
 
         ArrayList<byte[]> records = new ArrayList<>();
         records.add("record1".getBytes());
         records.add("record2".getBytes());
         records.add("record3".getBytes());
-        EventStreamWriter<byte[]> localWriter = localFactory
+        EventStreamWriter<byte[]> inputWriter = localFactory
                 .createEventWriter(inputStreamName, new JavaSerializer<>(), writerConfig);
         for (byte[] record : records) {
-            localWriter.writeEvent(record).join();
+            inputWriter.writeEvent(record).join();
             log.info("Wrote event {}%n", record);
         }
-        localWriter.close();
+        inputWriter.close();
 
-        final String readerGroup = "remoteReaderGroup";
-        final String readerId = "remoteReader";
+        final String readerGroup = "outputReaderGroup";
+        final String readerId = "outputReader";
         final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
                 .stream(Stream.of(outputStreamScope, outputStreamName))
                 .build();
