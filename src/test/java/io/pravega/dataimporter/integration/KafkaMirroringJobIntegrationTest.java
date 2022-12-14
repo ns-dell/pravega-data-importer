@@ -40,8 +40,8 @@ import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -72,21 +72,20 @@ public class KafkaMirroringJobIntegrationTest {
 
     private static final int READER_TIMEOUT_MS = 10000;
 
-    private static EmbeddedKafkaCluster kafka;
-
     final String kafkaTopicName = "test-topic";
     final String streamScope = "testScope";
     final String streamName = "testStream";
+    private EmbeddedKafkaCluster kafka;
 
-    @BeforeClass
-    public static void setupKafka() {
-        kafka = provisionWith(defaultClusterConfig());
-        kafka.start();
+    @Before
+    public void setupKafka() {
+        this.kafka = provisionWith(defaultClusterConfig());
+        this.kafka.start();
     }
 
-    @AfterClass
-    public static void tearDownKafka() {
-        kafka.stop();
+    @After
+    public void tearDownKafka() {
+        this.kafka.stop();
     }
 
     @Test
