@@ -26,7 +26,6 @@ import io.pravega.dataimporter.PravegaEmulatorResource;
 import io.pravega.dataimporter.actions.AbstractAction;
 import io.pravega.dataimporter.actions.ActionFactory;
 import io.pravega.dataimporter.actions.PravegaMirroringAction;
-import io.pravega.dataimporter.utils.PravegaRecord;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
@@ -95,8 +94,7 @@ public class PravegaMirroringJobIntegrationTest {
 
         assertTrue(outputStreamManager.checkStreamExists(outputStreamScope, outputStreamName));
 
-        ClientConfig inputClientConfig = ClientConfig.builder()
-                .controllerURI(URI.create(inputControllerURI)).build();
+        ClientConfig inputClientConfig = INPUT_EMULATOR.getClientConfig();
         EventWriterConfig writerConfig = EventWriterConfig.builder().build();
         EventStreamClientFactory localFactory = EventStreamClientFactory
                 .withScope(inputStreamScope, inputClientConfig);
@@ -124,12 +122,12 @@ public class PravegaMirroringJobIntegrationTest {
 
         try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(outputStreamScope,
                 ClientConfig.builder().controllerURI(URI.create(outputControllerURI)).build());
-             EventStreamReader<PravegaRecord> reader = clientFactory.createReader(readerId,
+             EventStreamReader<byte[]> reader = clientFactory.createReader(readerId,
                      readerGroup,
                      new JavaSerializer<>(),
                      ReaderConfig.builder().build())) {
             log.info("Reading all the events from {}/{}", outputStreamScope, outputStreamName);
-            EventRead<PravegaRecord> event = null;
+            EventRead<byte[]> event = null;
             int count = 0;
             do {
                 try {
