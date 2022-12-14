@@ -19,17 +19,25 @@ import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.*;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReaderConfig;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.Stream;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.dataimporter.PravegaEmulatorResource;
 import io.pravega.dataimporter.actions.ActionFactory;
 import io.pravega.dataimporter.actions.KafkaMirroringAction;
 import io.pravega.dataimporter.utils.PravegaRecord;
+import io.pravega.test.common.AssertExtensions;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import net.mguenther.kafka.junit.KeyValue;
 import net.mguenther.kafka.junit.SendKeyValues;
+import org.apache.flink.api.common.JobStatus;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.junit.AfterClass;
@@ -41,7 +49,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
@@ -63,12 +70,13 @@ public class KafkaMirroringJobIntegrationTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    final String kafkaTopicName = "test-topic";
-    final String streamScope = "testScope";
-    final String streamName = "testStream";
     private static final int READER_TIMEOUT_MS = 10000;
 
     private static EmbeddedKafkaCluster kafka;
+
+    final String kafkaTopicName = "test-topic";
+    final String streamScope = "testScope";
+    final String streamName = "testStream";
 
     @BeforeClass
     public static void setupKafka() {
@@ -103,6 +111,8 @@ public class KafkaMirroringJobIntegrationTest {
         argsMap.put("output-controller", controllerURI);
         argsMap.put("bootstrap.servers", kafkaBrokerList);
         argsMap.put("isStreamOrdered", String.valueOf(true));
+        argsMap.put("checkpointIntervalMs", "1000");
+        argsMap.put("checkpointTimeoutMs", "5000");
 
         URI remoteControllerURI = URI.create(EMULATOR.getControllerURI());
 
@@ -110,9 +120,10 @@ public class KafkaMirroringJobIntegrationTest {
         StreamManager streamManager = StreamManager.create(remoteControllerURI);
         streamManager.createScope(streamScope);
 
-        ActionFactory.createActionSubmitJob(argsMap, false);
+        JobClient jobClient = ActionFactory.createActionSubmitJob(argsMap, false);
 
         assertTrue(streamManager.checkStreamExists(streamScope, streamName));
+        AssertExtensions.assertEventuallyEquals(true, () -> jobClient.getJobStatus().join().equals(JobStatus.RUNNING), READER_TIMEOUT_MS);
 
         final String readerGroup = "outputReaderGroup";
         final String readerId = "outputReader";
@@ -143,7 +154,7 @@ public class KafkaMirroringJobIntegrationTest {
                     //There are certain circumstances where the reader needs to be reinitialized
                     e.printStackTrace();
                 }
-            } while (Objects.requireNonNull(event).getEvent() != null);
+            } while (count != records.size());
             log.info("No more events from {}/{}", streamScope, streamName);
 
             assertEquals(records.size(), count);

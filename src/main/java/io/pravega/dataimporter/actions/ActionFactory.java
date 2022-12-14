@@ -17,6 +17,7 @@ package io.pravega.dataimporter.actions;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.pravega.dataimporter.AppConfiguration;
+import org.apache.flink.core.execution.JobClient;
 
 import java.io.IOException;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class ActionFactory {
         }
     }
 
-    public static int createActionSubmitJob(Map<String, String> argsMap, boolean remoteCluster) {
+    public static JobClient createActionSubmitJob(Map<String, String> argsMap, boolean remoteCluster) {
         AppConfiguration configuration;
         try {
             configuration = AppConfiguration.createAppConfiguration(argsMap);
@@ -61,7 +62,6 @@ public class ActionFactory {
         dataImportAction.commitMetadataChanges();
 
         // STEP 3: Submit the associated job to Flink.
-        dataImportAction.submitDataImportJob();
-        return 0;
+        return dataImportAction.submitDataImportJob();
     }
 }

@@ -19,15 +19,25 @@ import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.*;
+import io.pravega.client.stream.EventStreamWriter;
+import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.Stream;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReaderConfig;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.dataimporter.AppConfiguration;
 import io.pravega.dataimporter.PravegaEmulatorResource;
 import io.pravega.dataimporter.actions.AbstractAction;
 import io.pravega.dataimporter.actions.ActionFactory;
 import io.pravega.dataimporter.actions.PravegaMirroringAction;
+import io.pravega.test.common.AssertExtensions;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.JobStatus;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.junit.ClassRule;
@@ -36,7 +46,6 @@ import org.junit.Test;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -57,11 +66,11 @@ public class PravegaMirroringJobIntegrationTest {
 
     @ClassRule
     public static final PravegaEmulatorResource OUTPUT_EMULATOR = PravegaEmulatorResource.builder().build();
+    private static final int READER_TIMEOUT_MS = 10000;
     final String inputStreamScope = "inputScope";
     final String inputStreamName = "inputStream";
     final String outputStreamScope = "outputScope";
     final String outputStreamName = "outputStream";
-    private static final int READER_TIMEOUT_MS = 10000;
 
     @Test
     public void testPravegaStreamMirroringJob() throws Exception {
@@ -76,6 +85,8 @@ public class PravegaMirroringJobIntegrationTest {
         argsMap.put("output-stream", Stream.of(outputStreamScope, outputStreamName).getScopedName());
         argsMap.put("output-controller", outputControllerURI);
         argsMap.put("isStreamOrdered", String.valueOf(true));
+        argsMap.put("checkpointIntervalMs", "1000");
+        argsMap.put("checkpointTimeoutMs", "5000");
 
         AppConfiguration appConfiguration = AppConfiguration.createAppConfiguration(argsMap);
 
@@ -90,9 +101,10 @@ public class PravegaMirroringJobIntegrationTest {
         StreamManager outputStreamManager = StreamManager.create(URI.create(outputControllerURI));
         outputStreamManager.createScope(outputStreamScope);
 
-        ActionFactory.createActionSubmitJob(argsMap, false);
+        JobClient jobClient = ActionFactory.createActionSubmitJob(argsMap, false);
 
         assertTrue(outputStreamManager.checkStreamExists(outputStreamScope, outputStreamName));
+        AssertExtensions.assertEventuallyEquals(true, () -> jobClient.getJobStatus().join().equals(JobStatus.RUNNING), READER_TIMEOUT_MS);
 
         ClientConfig inputClientConfig = INPUT_EMULATOR.getClientConfig();
         EventWriterConfig writerConfig = EventWriterConfig.builder().build();
@@ -127,7 +139,7 @@ public class PravegaMirroringJobIntegrationTest {
                      new JavaSerializer<>(),
                      ReaderConfig.builder().build())) {
             log.info("Reading all the events from {}/{}", outputStreamScope, outputStreamName);
-            EventRead<byte[]> event = null;
+            EventRead<byte[]> event;
             int count = 0;
             do {
                 try {
@@ -140,7 +152,7 @@ public class PravegaMirroringJobIntegrationTest {
                     //There are certain circumstances where the reader needs to be reinitialized
                     e.printStackTrace();
                 }
-            } while (Objects.requireNonNull(event).getEvent() != null);
+            } while (count != records.size());
             log.info("No more events from {}/{}", outputStreamScope, outputStreamName);
 
             assertEquals(records.size(), count);
