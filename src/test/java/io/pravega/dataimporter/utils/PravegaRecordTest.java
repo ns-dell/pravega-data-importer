@@ -57,5 +57,6 @@ public class PravegaRecordTest {
         PravegaRecord actual = outList.get(0);
 
         assertEquals(expected, actual);
+        assertEquals(expected.hashCode(), actual.hashCode());
     }
 }

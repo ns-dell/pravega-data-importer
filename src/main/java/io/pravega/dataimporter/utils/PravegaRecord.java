@@ -52,14 +52,6 @@ public class PravegaRecord implements Serializable {
         this.timestamp = timestamp;
     }
 
-    //    public byte[] getKey() {
-    //        return key;
-    //    }
-    //
-    //    public byte[] getValue() {
-    //        return value;
-    //    }
-
     public HashMap<String, byte[]> getHeaders() {
         return new HashMap<>(headers);
     }
