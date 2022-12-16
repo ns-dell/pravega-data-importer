@@ -93,8 +93,6 @@ dependencies {
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
     implementation "org.apache.flink:flink-runtime-web:${flinkVersion}"
     implementation "org.apache.flink:flink-core:${flinkVersion}"
-//    implementation "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
-//    implementation "io.pravega:pravega-client:0.12.0"
     implementation "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
