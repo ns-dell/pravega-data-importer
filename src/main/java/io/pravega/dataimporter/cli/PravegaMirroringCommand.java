@@ -16,58 +16,93 @@
 package io.pravega.dataimporter.cli;
 
 import io.pravega.dataimporter.actions.ActionFactory;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "stream-mirroring",
+/**
+ * Picocli sub-command for initiating Pravega Stream Mirroring workflow.
+ */
+@Command(name = "stream-mirroring",
         description = "Initiates Pravega Stream Mirroring Command",
         mixinStandardHelpOptions = true)
 public class PravegaMirroringCommand implements Callable<Integer> {
 
-    @CommandLine.Option(
+    /**
+     * Scoped Pravega stream name that data-importer reads from.
+     */
+    @Option(
             names = "input-stream",
             description = "Scoped Pravega stream name that data-importer reads from.",
             required = true)
     String inputStream;
-    @CommandLine.Option(
+
+    /**
+     * Pravega Controller URL of input stream.
+     */
+    @Option(
             names = "input-controller",
             description = "Pravega Controller URL of input stream.",
             defaultValue = "tcp://localhost:9090")
     String inputController = "tcp://localhost:9090";
-    @CommandLine.Option(
+
+    /**
+     * Choose whether the input stream starts at the tail of the stream or not.
+     */
+    @Option(
             names = "input-startAtTail",
             description = "Choose whether the input stream starts at the tail of the stream or not.")
     boolean inputStartAtTail = false;
 
-    @CommandLine.Option(
+    /**
+     * Choose whether input stream is ordered or not.
+     */
+    @Option(
             names = "isStreamOrdered",
             description = "Choose whether input stream is ordered or not.")
     boolean isStreamOrdered = true;
 
-    @CommandLine.Option(
+    /**
+     * Scoped Pravega stream name that data-importer writes to.
+     */
+    @Option(
             names = "output-stream",
             description = "Scoped Pravega stream name that data-importer writes to.",
             required = true)
     String outputStream;
-    @CommandLine.Option(
+
+    /**
+     * Pravega Controller URL of output stream.
+     */
+    @Option(
             names = "output-controller",
             description = "Pravega Controller URL of output stream.",
             defaultValue = "tcp://localhost:9090")
     String outputController = "tcp://localhost:9090";
 
-    @CommandLine.Option(
+    /**
+     * Flink Host Name (e.g. localhost)
+     */
+    @Option(
             names = "flink-host",
             description = "Flink Host Name (e.g. localhost)",
             defaultValue = "localhost")
     String flinkHost = "localhost";
-    @CommandLine.Option(
+
+    /**
+     * Flink Port Number (e.g. 8081)
+     */
+    @Option(
             names = "flink-port",
             description = "Flink Port Number (e.g. 8081)",
             defaultValue = "8081")
     int flinkPort = 8081;
 
+    /**
+     * Starts the Pravega Stream Mirroring execution workflow with CLI parameters.
+     */
     @Override
     public Integer call() {
         // When this method is executed, we should expect the following:

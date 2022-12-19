@@ -16,53 +16,85 @@
 package io.pravega.dataimporter.cli;
 
 import io.pravega.dataimporter.actions.ActionFactory;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "kafka-stream-mirroring",
+/**
+ * Picocli sub-command for initiating Kafka Stream Mirroring workflow.
+ */
+@Command(name = "kafka-stream-mirroring",
         description = "Initiates Kafka Stream Mirroring Command",
         mixinStandardHelpOptions = true)
 public class KafkaMirroringCommand implements Callable<Integer> {
-    @CommandLine.Option(
+
+    /**
+     * Kafka topic that data-importer reads from.
+     */
+    @Option(
             names = "input-topic",
             description = "Kafka topic that data-importer reads from.",
             required = true)
     String inputTopic;
-    @CommandLine.Option(
+
+    /**
+     * Kafka Controller URL of input stream.
+     */
+    @Option(
             names = "bootstrap-servers",
             description = "Kafka Controller URL of input stream.",
             defaultValue = "tcp://localhost:9092")
     String bootstrapServers = "tcp://localhost:9092";
 
-    @CommandLine.Option(
+    /**
+     * Choose whether input stream is ordered or not.
+     */
+    @Option(
             names = "isStreamOrdered",
             description = "Choose whether input stream is ordered or not.")
     boolean isStreamOrdered = true;
 
-    @CommandLine.Option(
+    /**
+     * Scoped Pravega stream name that data-importer writes to.
+     */
+    @Option(
             names = "output-stream",
             description = "Scoped Pravega stream name that data-importer writes to.",
             required = true)
     String outputStream;
-    @CommandLine.Option(
+
+    /**
+     * Pravega Controller URL of output stream.
+     */
+    @Option(
             names = "output-controller",
             description = "Pravega Controller URL of output stream.",
             defaultValue = "tcp://localhost:9090")
     String outputController = "tcp://localhost:9090";
 
-    @CommandLine.Option(
+    /**
+     * Flink Host Name (e.g. localhost)
+     */
+    @Option(
             names = "flink-host",
             description = "Flink Host Name (e.g. localhost)",
             defaultValue = "localhost")
     String flinkHost = "localhost";
-    @CommandLine.Option(
+
+    /**
+     * Flink Port Number (e.g. 8081)
+     */
+    @Option(
             names = "flink-port",
             description = "Flink Port Number (e.g. 8081)",
             defaultValue = "8081")
     int flinkPort = 8081;
 
+    /**
+     * Starts the Kafka Stream Mirroring execution workflow with CLI parameters.
+     */
     @Override
     public Integer call() {
         // When this method is executed, we should expect the following:
