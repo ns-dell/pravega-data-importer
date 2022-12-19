@@ -28,11 +28,13 @@ import java.util.Map;
 public class ActionFactory {
 
     /**
-     * Method that instantiates concrete implementations of AbstractAction.
+     * Method that instantiates concrete implementations of {@link AbstractAction}.
      * @param actionType input String based on name of action
      * @param configuration application configuration
      * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster. Setting this
      *                      parameter to false is useful for testing.
+     *
+     * @return Concrete implementation of {@link AbstractAction} based on input parameter.
      */
     @VisibleForTesting
     static AbstractAction instantiateAction(String actionType, AppConfiguration configuration, boolean remoteCluster) {
@@ -46,6 +48,16 @@ public class ActionFactory {
         }
     }
 
+    /**
+     * Static Method that encompasses the life cycle of a data importer use case. Instantiates action based on input
+     * parameters, runs metadata workflow for the action, and submits associated job to Flink cluster.
+     *
+     * @param argsMap map of command line arguments used to create an {@link AppConfiguration}
+     * @param remoteCluster whether to execute on remote or local (JVM instantiated) Flink cluster.
+     *                      Setting this parameter to false is useful for testing.
+     *
+     * @return {@link JobClient} returned after Flink job is submitted to Flink's execution environment
+     */
     public static JobClient createActionSubmitJob(Map<String, String> argsMap, boolean remoteCluster) {
         AppConfiguration configuration;
         try {

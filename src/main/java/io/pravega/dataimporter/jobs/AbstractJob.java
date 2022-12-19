@@ -48,6 +48,8 @@ public abstract class AbstractJob {
 
     /**
      * Used to retrieve the application configuration, containing parameters.
+     *
+     * @return Application configuration
      */
     public AppConfiguration getConfig() {
         return config;
@@ -55,6 +57,8 @@ public abstract class AbstractJob {
 
     /**
      * Concrete implementations use this method to submit Flink jobs to the Flink cluster.
+     *
+     * @return {@link JobClient} returned after job is submitted to Flink cluster
      */
     public abstract JobClient submitJob();
 
@@ -62,6 +66,9 @@ public abstract class AbstractJob {
      * Get head and tail stream cuts for a Pravega stream.
      *
      * @param streamConfig stream configuration
+     *
+     * @return {@link StreamInfo} object associated with provided Pravega
+     *          {@link io.pravega.dataimporter.AppConfiguration.StreamConfig}
      */
     public static StreamInfo getStreamInfo(AppConfiguration.StreamConfig streamConfig) {
         try (StreamManager streamManager = StreamManager.create(streamConfig.getPravegaConfig().getClientConfig())) {
@@ -74,6 +81,8 @@ public abstract class AbstractJob {
      * (depending on isStartAtTail).
      *
      * @param streamConfig stream configuration
+     *
+     * @return Resolved starting {@link StreamCut}
      */
     public static StreamCut resolveStartStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isStartAtTail()) {
@@ -91,6 +100,8 @@ public abstract class AbstractJob {
      * For unbounded reads, returns UNBOUNDED.
      *
      * @param streamConfig stream configuration
+     *
+     * @return Resolved ending {@link StreamCut}
      */
     public static StreamCut resolveEndStreamCut(AppConfiguration.StreamConfig streamConfig) {
         if (streamConfig.isEndAtTail()) {
@@ -110,6 +121,8 @@ public abstract class AbstractJob {
      * @param remoteCluster If true, returned environment will specifically be a
      *                      {@link org.apache.flink.streaming.api.environment.RemoteStreamEnvironment}. Else, an environment will be created
      *                      based on context in which program is currently executed.
+     *
+     * @return {@link StreamExecutionEnvironment} based on context in which program is being executed
      */
     public static StreamExecutionEnvironment initializeFlinkStreaming(AppConfiguration config, boolean remoteCluster) {
         StreamExecutionEnvironment env;
@@ -159,6 +172,8 @@ public abstract class AbstractJob {
 
     /**
      * Initializes Flink ExecutionEnvironment in batched processing mode.
+     *
+     * @return {@link ExecutionEnvironment} initialized in batched processing mode
      */
     public ExecutionEnvironment initializeFlinkBatch() {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();

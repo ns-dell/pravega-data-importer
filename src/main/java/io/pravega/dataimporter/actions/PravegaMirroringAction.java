@@ -39,6 +39,11 @@ public class PravegaMirroringAction extends AbstractAction {
         super.job = new PravegaMirroringJob(this.config, remoteCluster);
     }
 
+    /**
+     * Returns the application configuration passed in during action creation.
+     *
+     * @return Application configuration of the PravegaMirroringAction.
+     */
     public AppConfiguration getConfig() {
         return config;
     }

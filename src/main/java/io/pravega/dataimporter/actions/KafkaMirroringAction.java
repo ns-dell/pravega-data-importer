@@ -43,6 +43,8 @@ public class KafkaMirroringAction extends AbstractAction {
 
     /**
      * Returns the application configuration passed in during action creation.
+     *
+     * @return Application configuration of the KafkaMirroringAction.
      */
     public AppConfiguration getConfig() {
         return config;

@@ -39,15 +39,21 @@ public abstract class AbstractAction {
 
     /**
      * Returns the name of the job.
+     *
+     * @return Name of the job
      */
     public abstract String getJobName();
 
     /**
      * Submits Flink job to Flink cluster, and logs the {@link org.apache.flink.api.common.JobID} of the submitted job.
+     *
+     * @return {@link JobClient} returned after Flink job is submitted to Flink's
+     * {@link org.apache.flink.streaming.api.environment.StreamExecutionEnvironment}.
+     * The {@link JobClient} can be used to monitor the status of the submitted job.
      */
     public JobClient submitDataImportJob() {
         JobClient jobClient = this.job.submitJob();
-        log.info("\n\n\nJob ID: " + jobClient.getJobID().toString() + "\n\n");
+        log.info("Flink Job ID: " + jobClient.getJobID().toString());
         return jobClient;
     }
 
