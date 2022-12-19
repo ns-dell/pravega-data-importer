@@ -57,6 +57,8 @@ public class PravegaMirroringJob extends AbstractJob {
      * @param inputStreamConfig Input Stream configuration needed for {@link FlinkPravegaReader}
      * @param startStreamCut Starting stream cut
      * @param endStreamCut Ending stream cut
+     *
+     * @return An instantiated and configured {@link FlinkPravegaReader}
      */
     public static FlinkPravegaReader<byte[]> createFlinkPravegaReader(AppConfiguration.StreamConfig inputStreamConfig,
                                                                       StreamCut startStreamCut,
@@ -75,6 +77,8 @@ public class PravegaMirroringJob extends AbstractJob {
      * @param isStreamOrdered boolean used to determine if writes in input stream are ordered. If true, routing key is
      *                        taken from current thread name. Else, it is an unordered write.
      * @param pravegaWriterMode The writer mode of BEST_EFFORT, ATLEAST_ONCE, or EXACTLY_ONCE.
+     *
+     * @return An instantiated and configured {@link FlinkPravegaWriter}
      */
     public static FlinkPravegaWriter<byte[]> createFlinkPravegaWriter(AppConfiguration.StreamConfig outputStreamConfig,
                                                                boolean isStreamOrdered,

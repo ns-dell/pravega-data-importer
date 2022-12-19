@@ -58,6 +58,7 @@ public class KafkaMirroringJob extends AbstractJob {
      * Create and configure the KafkaSource to replicate streams from.
      * @param bootstrapServers servers string for KafkaSource.builder().setBootstrapServers()
      * @param kafkaTopic topic to mirror to Pravega
+     *
      * @return constructed KafkaSource
      */
     public static KafkaSource<PravegaRecord> createKafkaSourceForPravegaRecord(
@@ -75,6 +76,7 @@ public class KafkaMirroringJob extends AbstractJob {
      * @param outputStreamConfig stream config
      * @param isStreamOrdered are the events in the source Kafka Topic ordered?
      * @param pravegaWriterMode at-least-once or exactly-once semantics
+     *
      * @return constructed FlinkPravegaWriter
      */
     public static FlinkPravegaWriter<PravegaRecord> createFlinkPravegaWriterForPravegaRecord(
