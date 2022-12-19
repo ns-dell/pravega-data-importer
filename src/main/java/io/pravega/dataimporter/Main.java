@@ -17,9 +17,13 @@ package io.pravega.dataimporter;
 
 import io.pravega.dataimporter.cli.KafkaMirroringCommand;
 import io.pravega.dataimporter.cli.PravegaMirroringCommand;
+import picocli.CommandLine.Command;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "pravega-data-importer",
+/**
+ * Main method of data importer. CLI sub-commands are registered in command annotation.
+ */
+@Command(name = "pravega-data-importer",
         mixinStandardHelpOptions = true,
         subcommands = {PravegaMirroringCommand.class, KafkaMirroringCommand.class})
 public class Main {
