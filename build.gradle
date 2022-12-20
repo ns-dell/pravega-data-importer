@@ -13,7 +13,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version "${shadowVersion}"
     id "com.github.spotbugs" version "${spotbugsPluginVersion}"
     id "io.franzbecker.gradle-lombok" version "${gradleLombokPluginVersion}"
     id "checkstyle"
@@ -30,6 +30,8 @@ apply from: "$rootDir/gradle/jacoco.gradle"
 
 group = "io.pravega"
 description = "Pravega Data Importer"
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 // Allow main class name to be specified with -PmainClass=xxx.
 application {
@@ -68,6 +70,7 @@ configurations.all {
 
 shadowJar {
     configurations = [project.configurations.flinkShadowJar]
+    zip64 true
 }
 
 lombok {
@@ -79,8 +82,8 @@ dependencies {
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsAnnotationsVersion}"
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsVersion}"
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${spotbugsVersion}"
     compileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
     testCompileOnly 'org.projectlombok:lombok:' + "${lombokVersion}"
     annotationProcessor 'org.projectlombok:lombok:' + "${lombokVersion}"
@@ -93,25 +96,22 @@ dependencies {
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
     implementation "org.apache.flink:flink-runtime-web:${flinkVersion}"
     implementation "org.apache.flink:flink-core:${flinkVersion}"
-    implementation "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
-    implementation 'info.picocli:picocli:4.7.0'
-    testImplementation 'net.mguenther.kafka:kafka-junit:3.2.2'
-    testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
-    testImplementation 'io.pravega:pravega-standalone:0.12.0'
-    testImplementation 'io.pravega:pravega-test-integration:0.12.0'
+    implementation "info.picocli:picocli:${picocliVersion}"
+    testImplementation "net.mguenther.kafka:kafka-junit:${kafkaJunitVersion}"
+    testImplementation "io.pravega:pravega-standalone:${pravegaVersion}"
+    testImplementation "io.pravega:pravega-test-integration:${pravegaVersion}"
+    testImplementation "io.pravega:pravega-shared-security:${pravegaVersion}"
 
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
 
     flinkShadowJar "io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}"
+    flinkShadowJar "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
-    implementation 'io.pravega:pravega-shared-security:0.12.0'
-
-    // Schema registry dependencies required due to https://github.com/pravega/flink-connectors/issues/440
-    //    flinkShadowJar group: 'io.pravega', name: 'schemaregistry-serializers', classifier: 'all', version: schemaRegistryVersion
+    flinkShadowJar "com.google.guava:guava:${guavaVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testCompileOnly "junit:junit:${junitVersion}"
