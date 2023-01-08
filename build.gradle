@@ -101,10 +101,16 @@ dependencies {
     implementation "ch.qos.logback:logback-core:${logbackVersion}"
     implementation "org.scala-lang:scala-compiler:${scalaCompilerVersion}"
     implementation "info.picocli:picocli:${picocliVersion}"
+    implementation "io.pravega:pravega-shared-security:${pravegaVersion}"
+    implementation "io.pravega:pravega-client:${pravegaVersion}"
+    implementation "io.pravega:pravega-shared-protocol:${pravegaVersion}"
+    implementation "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
+    implementation("io.pravega:pravega-connectors-flink-${flinkShortVersion}_${flinkScalaVersion}:${pravegaFlinkConnectorVersion}") {
+        transitive = false
+    }
     testImplementation "net.mguenther.kafka:kafka-junit:${kafkaJunitVersion}"
     testImplementation "io.pravega:pravega-standalone:${pravegaVersion}"
     testImplementation "io.pravega:pravega-test-integration:${pravegaVersion}"
-    testImplementation "io.pravega:pravega-shared-security:${pravegaVersion}"
 
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
 
