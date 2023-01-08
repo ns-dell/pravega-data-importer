@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter.actions;
 
-/**
- * Implements the workflow related to mirroring one Pravega Stream from one cluster to another.
- */
-public class MirroringAction extends Action {
 
-    public final static String NAME = "stream-mirroring";
-
-    @Override
-    public void commitMetadataChanges() {
-
+plugins.withId('com.github.spotbugs') {
+    spotbugs {
+        toolVersion = spotbugsVersion
+        effort = "max"
+        includeFilter = file("$rootDir/checkstyle/spotbugs-include.xml")
+        excludeFilter = file("$rootDir/checkstyle/spotbugs-exclude.xml")
+        ignoreFailures = false
     }
-
-    @Override
-    public String getJobName() {
-        return "PravegaStreamMirroringJob";
+    spotbugsMain {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
     }
 }

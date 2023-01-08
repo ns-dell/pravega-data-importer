@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pravega.dataimporter.actions;
-
-public class ImportAction extends Action {
-
-    public final static String NAME = "stream-import";
-
-    @Override
-    public void commitMetadataChanges() {
-
+plugins.withId('jacoco') {
+    jacoco {
+        toolVersion = jacocoVersion
+    }
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            html.enabled false
+        }
     }
 
-    @Override
-    public String getJobName() {
-        return "PravegaImportMirroringJob";
-    }
+    test { finalizedBy jacocoTestReport }
 }
